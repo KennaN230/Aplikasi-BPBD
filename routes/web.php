@@ -2,13 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KejadianController;
 
 // Halaman Welcome
 Route::view('/', 'welcome')->name('home');
 
 // Halaman Utama (Dashboard, Kejadian, Admin)
 Route::view('/dashboard', 'formDashboard')->name('dashboard');
-Route::view('/kejadian', 'formKejadian')->name('kejadian');
+Route::get('/kejadian', [KejadianController::class, 'index'])->name('kejadian');
 Route::view('/admin', 'Admin')->name('admin.home'); // resources/views/Admin.blade.php
 
 // Group Authentication Routes
