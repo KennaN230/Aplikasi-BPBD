@@ -61,7 +61,7 @@ class AuthController extends Controller
         return redirect()->intended('/dashboard');
     }
 
-    // Menampilkan form register
+    // Menampilkan form registera
     public function showRegisterForm()
     {
         return view('register');
