@@ -198,7 +198,7 @@
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
-            </thead>
+            </thead> 
             <tbody>
                 <tr>
                     <td>1</td><td>Wildatul Fajriyah</td><td>wildatul@gmail.com</td><td>Admin</td><td>Aktif</td>
