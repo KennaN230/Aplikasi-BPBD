@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BPBD Kabupaten Malang</title>
@@ -65,7 +66,7 @@
             <img src="/gambar/Logo_Kabupaten_Malang 1.png" alt="Kabupaten Malang Logo">
         </div>
         <h1>Selamat Datang Di Pusat Informasi<br>Kejadian Kabupaten Malang</h1>
-        <a href="/login" class="btn">LOGIN</a>
+        <a href="/login" class="btn">LOGIn</a>
         <a href="/register" class="btn">REGISTER</a>
     </div>
 </body>

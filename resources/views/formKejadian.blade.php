@@ -116,7 +116,7 @@
 
     <!-- Infografis -->
     <div class="bg-white rounded-xl shadow p-4 mt-6">
-      <h3 class="font-bold mb-2">Infografis Sebaran Kejadian</h3>
+      <h3 class="font-bold mb-2">Infografis Sebaran Kejadian di kabupaten Malang</h3>
       <img src="https://via.placeholder.com/600x300" alt="Infografis" class="rounded-lg">
     </div>
   </main>
