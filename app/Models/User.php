@@ -10,6 +10,13 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+     // Menentukan nama tabel yang digunakan
+    protected $table = 'userr'; // Ganti 'users' dengan 'Userr'
+
+    // Primary key
+    protected $primaryKey = 'id_user'; // Pastikan sesuai dengan nama primary key di tabel
+
+
     /**
      * The attributes that are mass assignable.
      *
