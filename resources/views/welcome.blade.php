@@ -9,7 +9,7 @@
         body {
             margin: 0;
             font-family: 'Poppins', sans-serif;
-            background: url('/gambar/bpbd 1.png') no-repeat center center/cover;
+            background: url('/gambar/BPBD.jpg') no-repeat center center/cover;
             height: 100vh;
             display: flex;
             align-items: center;
@@ -115,7 +115,7 @@
         </div>
 
         <div class="button-container">
-            <a href="/Admin" class="btn">ADMIN</a>
+            <a href="/admin" class="btn">ADMIN</a>
             <a href="/user" class="btn">USER</a>
         </div>
 
