@@ -13,14 +13,11 @@
       box-sizing: border-box;
       font-family: 'Poppins', sans-serif;
     }
-
     body {
       display: flex;
       background: #f9f6f2;
       min-height: 100vh;
     }
-
-    /* Sidebar */
     .sidebar {
       width: 250px;
       background-color: #0A1F44;
@@ -29,7 +26,6 @@
       flex-direction: column;
       min-height: 100vh;
     }
-
     .sidebar-header {
       padding: 20px;
       display: flex;
@@ -46,7 +42,6 @@
       font-weight: 600;
       line-height: 1.3;
     }
-
     .sidebar-menu {
       display: flex;
       flex-direction: column;
@@ -68,26 +63,20 @@
       height: auto;
     }
     .sidebar-menu a:hover, .sidebar-menu a.active {
-            background-color: #F6F1ED;
-            border-left: 4px solid orange;
-            color: #122453; /* Mengubah warna teks menu aktif menjadi gelap */
-            font-weight: bold; /* Menebalkan teks menu aktif */
-        }
-
-        /* Mengubah warna gambar pada menu hover dan active */
-        .sidebar-menu a:hover img, .sidebar-menu a.active img {
-            filter: brightness(0) saturate(100%) invert(30%) sepia(100%) saturate(500%) hue-rotate(180deg);
-        }
-
-    /* Main content */
+      background-color: #F6F1ED;
+      border-left: 4px solid orange;
+      color: #122453;
+      font-weight: bold;
+    }
+    .sidebar-menu a:hover img, .sidebar-menu a.active img {
+      filter: brightness(0) saturate(100%) invert(30%) sepia(100%) saturate(500%) hue-rotate(180deg);
+    }
     .main {
       flex: 1;
       padding: 20px;
       display: flex;
       flex-direction: column;
     }
-
-    /* Topbar */
     .topbar {
       display: flex;
       justify-content: space-between;
@@ -98,10 +87,6 @@
       font-size: 20px;
       font-weight: 600;
       color: #122453;
-    }
-    .welcome p {
-      font-size: 13px;
-      color: gray;
     }
     .profile {
       display: flex;
@@ -123,8 +108,6 @@
     .profile-info .role {
       color: gray;
     }
-
-    /* Card form */
     .form-card {
       background: white;
       border-radius: 10px;
@@ -134,14 +117,12 @@
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       text-align: center;
     }
-
     .form-card h2 {
       font-size: 18px;
       font-weight: 600;
       margin-bottom: 25px;
       color: #122453;
     }
-
     .form-group {
       margin-bottom: 18px;
       text-align: left;
@@ -152,15 +133,14 @@
       margin-bottom: 6px;
       font-weight: 500;
     }
-    .form-group input {
+    .form-group input, 
+    .form-group select {
       width: 100%;
       padding: 10px 12px;
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 14px;
     }
-
-    /* Buttons */
     .actions {
       margin-top: 20px;
       display: flex;
@@ -185,7 +165,7 @@
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-header">
-      <img src="/gambar/Logo 1 1.png" alt="BPBD Kota Malang">
+      <img src="/gambar/Logo1.png" alt="BPBD Kota Malang">
       <img src="/gambar/Logo_Kabupaten_Malang 1.png" alt="Kabupaten Malang">
       <h2>Informasi Kejadian <br>Kab Malang</h2>
     </div>
@@ -222,20 +202,55 @@
       <form action="{{ route('rain.store') }}" method="POST">
         @csrf
         <div class="form-group">
-          <label for="kecamatan">hari tanggal</label>
-          <input type="date" id="hari_tanggal" name="hari_tanggal" placeholder="Masukkan tanggal">
+          <label for="hari_tanggal">Hari Tanggal</label>
+          <input type="date" id="hari_tanggal" name="hari_tanggal" required>
         </div>
         <div class="form-group">
           <label for="kecamatan">Kecamatan</label>
-          <input type="text" id="kecamatan" name="kecamatan" placeholder="Masukkan Kecamatan">
+          <select id="kecamatan" name="kecamatan" required>
+            <option value="">-- Pilih Kecamatan --</option>
+            <option value="Ngantang">Ngantang</option>
+            <option value="Karangploso">Karangploso </option>
+            <option value="Pujon">Pujon </option>
+            <option value="Singosari">Singosari </option>
+            <option value="Kasembon">Kasembon </option>
+            <option value="Pakis">Pakis </option>
+            <option value="Lawang">Lawang </option>
+            <option value="Jabung">Jabung </option>
+            <option value="Dau">Dau </option>
+            <option value="Tumpang">Tumpang </option>
+            <option value="Wagir">Wagir </option>
+            <option value="Poncokusumo">Poncokusumo </option>
+            <option value="Tajinan">Tajinan </option>
+            <option value="Ngajum">Ngajum </option>
+            <option value="Pakisaji">Pakisaji </option>
+            <option value="Wonosari">Wonosari </option>
+            <option value="Donomulyo">Donomulyo </option>
+            <option value="Ampelgading">Ampelgading </option>
+            <option value="Pagak">Pagak </option>
+            <option value="Turen">Turen </option>
+            <option value="Pagelaran">Pagelaran </option>
+            <option value="Sumbermanjing Wetan">Sumbermanjing Wetan </option>
+            <option value="Tirtoyudo">Tirtoyudo </option>
+            <option value="Gedangan">Gedangan </option>
+            <option value="Bululawang">Bululawang </option>
+            <option value="Kepanjen">Kepanjen </option>
+            <option value="Gondanglegi">Gondanglegi </option>
+            <option value="Bantur">Bantur </option>
+            <option value="Dampit">Dampit </option>
+            <option value="Wajak">Wajak </option>
+            <option value="Kalipare">Kalipare </option>
+            <option value="Kromengan">Kromengan </option>
+            <option value="Sumberpucung">Sumberpucung </option>
+          </select>
         </div>
         <div class="form-group">
-          <label for="hariHujan">Hari Hujan</label>
-          <input type="text" id="hariHujan" name="hari_hujan" placeholder="Masukkan Hari Hujan">
+          <label for="hari_hujan">Hari Hujan</label>
+          <input type="number" id="hari_hujan" name="hari_hujan" placeholder="Masukkan jumlah hari hujan" required>
         </div>
         <div class="form-group">
-          <label for="hariTidakHujan">Hari Tidak Hujan</label>
-          <input type="text" id="hariTidakHujan" name="hari_tidak_hujan" placeholder="Masukkan Hari Tidak Hujan">
+          <label for="hari_tidak_hujan">Hari Tidak Hujan</label>
+          <input type="number" id="hari_tidak_hujan" name="hari_tidak_hujan" placeholder="Masukkan jumlah hari tidak hujan" required>
         </div>
         <div class="actions">
           <button type="submit" class="btn btn-save">Simpan</button>

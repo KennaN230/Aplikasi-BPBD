@@ -4,62 +4,50 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Rain;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class RainController extends Controller
 {
-    // Menampilkan data + filter + grafik
+    // ✅ Tampilkan data & grafik
     public function index(Request $request)
     {
-        $bulan         = $request->get('bulan');
-        $tahun         = $request->get('tahun');
-        $cari          = $request->get('cari'); 
-        $tanggal_awal  = $request->get('tanggal_awal');
-        $tanggal_akhir = $request->get('tanggal_akhir');
-
         $query = Rain::query();
 
-        // filter bulan
-        if ($bulan) {
-            $query->whereMonth('hari_tanggal', $bulan);
+        // Filter data
+        if ($request->bulan) {
+            $query->whereMonth('hari_tanggal', $request->bulan);
+        }
+        if ($request->tahun) {
+            $query->whereYear('hari_tanggal', $request->tahun);
+        }
+        if ($request->cari) {
+            $query->where('kecamatan', 'like', '%' . $request->cari . '%');
+        }
+        if ($request->tanggal_awal && $request->tanggal_akhir) {
+            $query->whereBetween('hari_tanggal', [$request->tanggal_awal, $request->tanggal_akhir]);
         }
 
-        // filter tahun
-        if ($tahun) {
-            $query->whereYear('hari_tanggal', $tahun);
-        }
-
-        // filter kecamatan
-        if ($cari) {
-            $query->where('kecamatan', 'like', '%' . $cari . '%');
-        }
-
-        // filter rentang tanggal
-        if ($tanggal_awal && $tanggal_akhir) {
-            $query->whereBetween('hari_tanggal', [$tanggal_awal, $tanggal_akhir]);
-        }
-
-        // urutkan berdasarkan tanggal
         $data = $query->orderBy('hari_tanggal', 'asc')->get();
 
-        // data grafik ikut hasil query
-        $grafik = $data;
-
-        return view('rain', compact('data', 'grafik', 'bulan', 'tahun', 'cari', 'tanggal_awal', 'tanggal_akhir'));
+        return view('rain', [
+            'data' => $data,
+            'grafik' => $data,
+        ]);
     }
 
-    // Tampilkan form tambah data
+    // ✅ Form tambah data
     public function create()
     {
-        return view('tambahrain'); 
+        return view('tambahrain');
     }
 
-    // Simpan data baru
+    // ✅ Simpan data baru
     public function store(Request $request)
     {
         $request->validate([
-            'hari_tanggal'   => 'required|date',
-            'kecamatan'      => 'required|string|max:100',
-            'hari_hujan'     => 'required|integer',
+            'hari_tanggal'     => 'required|date',
+            'kecamatan'        => 'required|string|max:100',
+            'hari_hujan'       => 'required|integer',
             'hari_tidak_hujan' => 'required|integer',
         ]);
 
@@ -68,35 +56,107 @@ class RainController extends Controller
         return redirect()->route('rain.index')->with('success', 'Data berhasil ditambahkan!');
     }
 
-    // Edit data
-    public function edit($id)
+    // ✅ Form edit data
+    public function edit(Rain $rain)
     {
-        $rain = Rain::findOrFail($id);
         return view('rain_edit', compact('rain'));
     }
 
-    // Update data
-    public function update(Request $request, $id)
+    // ✅ Update data
+    public function update(Request $request, Rain $rain)
     {
         $request->validate([
-            'hari_tanggal'   => 'required|date',
-            'kecamatan'      => 'required|string|max:100',
-            'hari_hujan'     => 'required|integer',
+            'hari_tanggal'     => 'required|date',
+            'kecamatan'        => 'required|string|max:100',
+            'hari_hujan'       => 'required|integer',
             'hari_tidak_hujan' => 'required|integer',
         ]);
 
-        $rain = Rain::findOrFail($id);
         $rain->update($request->all());
 
         return redirect()->route('rain.index')->with('success', 'Data berhasil diupdate!');
     }
 
-    // Hapus data
-    public function destroy($id)
+    // ✅ Hapus data
+    public function destroy(Rain $rain)
     {
-        $rain = Rain::findOrFail($id);
         $rain->delete();
 
         return redirect()->route('rain.index')->with('success', 'Data berhasil dihapus!');
+    }
+
+    // ✅ Fungsi bantu untuk ambil logo dalam bentuk Base64
+    private function getLogos()
+    {
+        $pathLogo1 = public_path('gambar/logo1.png');
+        $pathLogo2 = public_path('gambar/logo2.png');
+
+        $logo1 = file_exists($pathLogo1) ? base64_encode(file_get_contents($pathLogo1)) : null;
+        $logo2 = file_exists($pathLogo2) ? base64_encode(file_get_contents($pathLogo2)) : null;
+
+        return compact('logo1', 'logo2');
+    }
+
+    // ✅ Cetak PDF tabel data
+    public function cetakPdf(Request $request)
+    {
+        $query = Rain::query();
+
+        // Filter data
+        if ($request->bulan) {
+            $query->whereMonth('hari_tanggal', $request->bulan);
+        }
+        if ($request->tahun) {
+            $query->whereYear('hari_tanggal', $request->tahun);
+        }
+        if ($request->cari) {
+            $query->where('kecamatan', 'like', '%' . $request->cari . '%');
+        }
+        if ($request->tanggal_awal && $request->tanggal_akhir) {
+            $query->whereBetween('hari_tanggal', [$request->tanggal_awal, $request->tanggal_akhir]);
+        }
+
+        $data = $query->orderBy('hari_tanggal', 'asc')->get();
+
+        // Ambil logo
+        $logos = $this->getLogos();
+
+        return view('rainpdf', array_merge($logos, [
+            'kejadian' => $data,
+            'tanggal' => $request->tanggal_awal && $request->tanggal_akhir
+                ? $request->tanggal_awal . ' s/d ' . $request->tanggal_akhir
+                : ($request->bulan ?? '') . ' ' . ($request->tahun ?? ''),
+        ]));
+    }
+
+    // ✅ Cetak PDF Grafik
+    public function cetakPdfGrafik(Request $request)
+    {
+        $query = Rain::query();
+
+        if ($request->bulan) {
+            $query->whereMonth('hari_tanggal', $request->bulan);
+        }
+        if ($request->tahun) {
+            $query->whereYear('hari_tanggal', $request->tahun);
+        }
+        if ($request->cari) {
+            $query->where('kecamatan', 'like', '%' . $request->cari . '%');
+        }
+        if ($request->tanggal_awal && $request->tanggal_akhir) {
+            $query->whereBetween('hari_tanggal', [$request->tanggal_awal, $request->tanggal_akhir]);
+        }
+
+        $data = $query->orderBy('hari_tanggal', 'asc')->get();
+
+        // Ambil logo
+        $logos = $this->getLogos();
+
+        return view('rainpdfgrafik', array_merge($logos, [
+            'kejadian' => $data,
+            'tanggal' => $request->tanggal_awal && $request->tanggal_akhir
+                ? $request->tanggal_awal . ' s/d ' . $request->tanggal_akhir
+                : ($request->bulan ?? '') . ' ' . ($request->tahun ?? ''),
+        ]));
     }
 }

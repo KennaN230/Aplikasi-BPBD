@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Rain extends Model
 {
     use HasFactory;
+    protected $table ='rain';
+    protected $primaryKey ='id';
 
     public $timestamps = false; // <-- ini WAJIB biar nggak insert created_at & updated_at
 
