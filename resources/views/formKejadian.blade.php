@@ -1,0 +1,100 @@
+{{-- resources/views/formDashboard.blade.php --}}
+@extends('layouts.app')
+
+@section('title', 'Dashboard Kejadian')
+
+@section('content')
+    {{-- Header --}}
+    <header class="bg-blue-600 text-white p-4 shadow">
+        <h1 class="text-xl font-bold">Dashboard Kejadian</h1>
+    </header>
+
+    {{-- Content --}}
+    <main class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {{-- Peta --}}
+            <div class="bg-white rounded-xl shadow p-4">
+                <h2 class="text-lg font-semibold mb-2">Peta Kejadian</h2>
+                <div id="map" class="w-full h-80 rounded"></div>
+            </div>
+
+            {{-- Chart Tahun --}}
+            <div class="bg-white rounded-xl shadow p-4">
+                <h2 class="text-lg font-semibold mb-2">Grafik Kejadian per Tahun</h2>
+                <canvas id="chartTahun" class="w-full h-80"></canvas>
+            </div>
+
+            {{-- Chart Bulan --}}
+            <div class="bg-white rounded-xl shadow p-4">
+                <h2 class="text-lg font-semibold mb-2">Grafik Kejadian per Bulan</h2>
+                <canvas id="chartBulan" class="w-full h-80"></canvas>
+            </div>
+
+            {{-- Tabel Kejadian --}}
+            <div class="bg-white rounded-xl shadow p-4 overflow-auto">
+                <h2 class="text-lg font-semibold mb-2">Data Kejadian</h2>
+                <table class="w-full border-collapse">
+                    <thead class="bg-blue-600 text-white">
+                        <tr>
+                            <th class="px-3 py-2 text-left">Nama Kejadian</th>
+                            <th class="px-3 py-2 text-left">Kecamatan</th>
+                            <th class="px-3 py-2 text-left">Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($kejadian as $item)
+                            <tr class="border-b hover:bg-gray-100">
+                                <td class="px-3 py-2">{{ $item->id_nama_kejadian }}</td>
+                                <td class="px-3 py-2">{{ $item->id_kecamatan }}</td>
+                                <td class="px-3 py-2">{{ $item->tanggal }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    {{-- Script --}}
+    <script>
+        // Leaflet Map
+        const map = L.map('map').setView([-7.9666, 112.6326], 11);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
+        L.marker([-7.9666, 112.6326]).addTo(map).bindPopup("Malang");
+
+        // Chart Tahun
+        const ctx1 = document.getElementById('chartTahun').getContext('2d');
+        new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['2021','2022','2023','2024','2025'],
+                datasets: [{
+                    label: 'Jumlah Kejadian',
+                    data: [12, 19, 7, 15, 10],
+                    backgroundColor: 'rgba(37, 99, 235, 0.7)'
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+
+        // Chart Bulan
+        const ctx2 = document.getElementById('chartBulan').getContext('2d');
+        new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'],
+                datasets: [{
+                    label: 'Jumlah Kejadian',
+                    data: [2, 4, 3, 6, 8, 5, 7, 6, 4, 3, 2, 1],
+                    borderColor: 'rgba(37, 99, 235, 1)',
+                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+    </script>
+@endsection

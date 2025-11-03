@@ -23,51 +23,56 @@
   .dropdown-cream.dropdown-menu{ background:var(--cream); border:0; border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
   .dropdown-cream .dm-head{ background:var(--cream); color:#0f2a4a; font-weight:700; padding:.6rem .9rem; border-bottom:1px solid var(--cream-hover) }
   .dropdown-cream .list-group-item{ background:transparent; border-color:var(--cream-hover) }
+
   .stats{border:0;border-radius:16px;background:#fff;box-shadow:var(--shadow)}
   .stats.primary{background:linear-gradient(180deg,var(--tile-blue),#fff)}
   .stats.warning{background:linear-gradient(180deg,var(--tile-orange),#fff)}
   .stats .title{font-weight:700}
   .stats .icon{width:42px;height:42px;border-radius:12px;background:#1a3a63;color:#fff;display:flex;align-items:center;justify-content:center}
+
   .progress.thin{height:10px;background:#e9edf5;border-radius:999px;overflow:hidden}
   .progress.thin .progress-bar{border-radius:999px}
   .progress.thin .progress-bar.blue{background:#1e4fa3}
   .progress.thin .progress-bar.orange{background:#f07a18}
+
   .toolbar{display:flex;align-items:center;gap:12px;margin:14px 0}
   .table-search{position:relative;max-width:360px}
   .table-search .bi-search{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#97a0b0}
   .table-search input{padding-left:40px;border-radius:12px}
+
   .soft-card{border:0;border-radius:16px;box-shadow:var(--shadow)}
   .table-wrap{max-height:460px;overflow:auto;border-radius:12px}
   .table-soft thead th{position:sticky;top:0;z-index:2;background:var(--navy);color:#fff;border:0!important}
   .table-soft tbody tr{border-color:#e9edf3}
+
   .badge.round{border-radius:999px;padding:.45rem .7rem;font-weight:700}
   .action-inline{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;white-space:nowrap}
   .action-inline>*{flex:0 0 auto}
   .action-inline form{margin:0;display:inline-block}
+
   .btn-tambah{background:#EA620D;border-color:#EA620D;color:#fff}
   .btn-tambah:hover{background:#d45609;border-color:#d45609}
   .btn-hapus{background:#E30707;border-color:#E30707;color:#fff}
   .btn-hapus:hover{background:#C60A0A;border-color:#C60A0A}
+
   .table-wrap::-webkit-scrollbar{width:8px}
   .table-wrap::-webkit-scrollbar-thumb{background:#375078;border-radius:8px}
+
   .status-text{font-weight:700; text-align:center; color:#0f2a4a}
-  .status-text.st-on{ color:#0b7f58; }    /* Aktif */
-  .status-text.st-off{ color:#2b3851; }   /* Tidak Aktif (tampilkan waktu) */
+  .status-text.st-on{ color:#0b7f58; }
+  .status-text.st-off{ color:#2b3851; }
 </style>
 @endpush
 
 @section('content')
 @php
-  // === Data user & avatar ===
   $me = auth()->user();
   $avatarUrl = ($me && $me->photo) ? asset('storage/'.$me->photo) : asset('gambar/profile.png');
   $avatarUrl .= '?t='.(optional($me->updated_at)->timestamp ?? time());
 
-  // === Notifikasi pending ===
   $pendingUsers = ($pendingUsers ?? collect());
   $n = (int) ($pendingCount ?? $pendingUsers->count());
 
-  // === Helper status online / waktu relatif (HANYA pakai lastActivityMap) ===
   /** @var array<int,\Carbon\Carbon|string> $lastActivityMap */
   $actMap  = $lastActivityMap ?? [];
   $window  = isset($sessionLifetime) ? (int)$sessionLifetime : 5; // menit
@@ -96,6 +101,7 @@
   };
 @endphp
 
+{{-- ===== HEADER ===== --}}
 <div class="dash-header">
   <div>
     <h2>Selamat Datang!</h2>
@@ -103,8 +109,8 @@
     <div class="dash-sub" id="clock">--:--:--</div>
   </div>
 
-  <div class="ms-auto d-flex align-items-center gap-2">
-    {{-- NOTIFIKASI --}}
+  <div class="ms-auto d-flex align-items-center gap:2">
+    {{-- Notifikasi akun pending --}}
     <div class="dropdown notif me-1">
       <button class="btn btn-cream btn-icon position-relative" data-bs-toggle="dropdown" aria-label="Notifikasi">
         <i class="bi bi-bell"></i>
@@ -129,12 +135,16 @@
                   <span class="badge text-bg-warning">Pending</span>
                 </div>
                 <div class="mt-2 d-flex gap-2">
+                  @if (Route::has('users.approve'))
                   <form method="POST" action="{{ route('users.approve', $u->id_user) }}">@csrf
                     <button class="btn btn-sm btn-success"><i class="bi bi-check2 me-1"></i>Setujui</button>
                   </form>
+                  @endif
+                  @if (Route::has('users.reject'))
                   <form method="POST" action="{{ route('users.reject', $u->id_user) }}">@csrf
                     <button class="btn btn-sm btn-outline-danger"><i class="bi bi-x-lg me-1"></i>Tolak</button>
                   </form>
+                  @endif
                 </div>
               </div>
             @endforeach
@@ -143,12 +153,12 @@
       </div>
     </div>
 
-    {{-- PROFIL --}}
+    {{-- Profil --}}
     <div class="dash-user">
       <img class="avatar" src="{{ $avatarUrl }}" alt="Foto {{ $me->nama ?? $me->name }}">
       <div>
         <div class="fw-semibold">{{ $me->nama ?? $me->name }}</div>
-        <div class="small text-muted">{{ ucfirst(strtolower($me->role)) }}</div>
+        <div class="small text-muted">{{ ucfirst(strtolower($me->role ?? 'User')) }}</div>
       </div>
       <div class="dropdown">
         <button type="button" class="btn btn-cream btn-pill-sm" data-bs-toggle="dropdown" aria-label="Menu profil">
@@ -171,7 +181,6 @@
 </div>
 
 @php
-  // ---- Fallback agar tidak Undefined Variable bila controller lain memanggil view ini
   $ta = (int) ($totalAdmin ?? 0);
   $tu = (int) ($totalUser  ?? 0);
   $total = max(1, $ta + $tu);
@@ -179,6 +188,7 @@
   $pUser  = round(($tu / $total) * 100);
 @endphp
 
+{{-- ===== KARTU STATISTIK ===== --}}
 <div class="row g-3">
   <div class="col-md-6">
     <div class="card stats primary">
@@ -211,23 +221,48 @@
   </div>
 </div>
 
-{{-- TOOLBAR --}}
+{{-- ===== TOOLBAR (Search + Aksi) ===== --}}
 <div class="toolbar">
   <form method="get" action="{{ route('dashboard') }}" class="table-search w-100" style="max-width:360px;">
     <i class="bi bi-search"></i>
     <input type="search" name="q" value="{{ $search ?? '' }}" class="form-control" placeholder="Cari..">
   </form>
   <div class="ms-auto d-flex gap-2">
+    {{-- CETAK LAPORAN HARIAN (modal pilih tanggal) --}}
+    @if (Route::has('laporan.harian'))
+      <button type="button" class="btn btn-cream btn-pill-sm" data-bs-toggle="modal" data-bs-target="#modalCetak">
+        <i class="bi bi-printer me-1"></i> Cetak Laporan Harian
+      </button>
+    @endif
+
+    {{-- Tambah user --}}
+    @if (Route::has('users.store'))
     <button type="button" class="btn btn-tambah btn-pill-sm" data-bs-toggle="modal" data-bs-target="#modalTambah">
       <i class="bi bi-plus-circle me-1"></i> Tambah
     </button>
+    @endif
+
+    {{-- Hapus banyak --}}
     <button id="btnDeleteSelected" type="button" class="btn btn-hapus btn-pill-sm">
       <i class="bi bi-trash me-1"></i> Hapus
     </button>
   </div>
 </div>
 
-{{-- TABEL --}}
+{{-- FLASH MESSAGE --}}
+@if(session('ok'))
+  <div class="alert alert-success">{{ session('ok') }}</div>
+@endif
+@if($errors->any())
+  <div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
+@endif
+
+{{-- ===== TABEL PENGGUNA ===== --}}
+@php
+  $list = $list ?? collect();
+  $isPaginator = is_object($list) && method_exists($list,'links');
+@endphp
+
 <div class="card soft-card">
   <div class="table-wrap">
     <table class="table table-hover align-middle mb-0 table-soft">
@@ -244,16 +279,16 @@
       </tr>
       </thead>
       <tbody>
-      @forelse(($list ?? collect()) as $u)
+      @forelse($list as $u)
         @php
-          $approval    = strtolower($u->status ?? 'pending'); // approved|pending|rejected
+          $approval    = strtolower($u->status ?? 'pending');
           $online      = $isOnline($u);
           $statusText  = $online ? 'Aktif' : $agoText($u);
           $statusClass = $online ? 'st-on'  : 'st-off';
         @endphp
         <tr>
           <td><input type="checkbox" class="row-check" value="{{ $u->id_user }}"></td>
-          <td>{{ ($list->firstItem() ?? 1) + $loop->index }}</td>
+          <td>{{ ($isPaginator ? ($list->firstItem() ?? 1) : 1) + $loop->index }}</td>
           <td class="fw-semibold">{{ $u->nama }}</td>
           <td>{{ $u->email }}</td>
 
@@ -279,6 +314,7 @@
 
           <td class="align-middle">
             <div class="action-inline">
+              {{-- EDIT --}}
               <button type="button"
                       class="btn btn-warning btn-sm btn-pill-sm"
                       data-bs-toggle="modal" data-bs-target="#modalEdit"
@@ -290,6 +326,8 @@
                 <i class="bi bi-pencil-square me-1"></i> Edit
               </button>
 
+              {{-- HAPUS --}}
+              @if (Route::has('users.destroy'))
               <form method="post" action="{{ route('users.destroy', $u->id_user) }}"
                     onsubmit="return confirm('Hapus pengguna ini?')">
                 @csrf @method('DELETE')
@@ -297,6 +335,7 @@
                   <i class="bi bi-trash me-1"></i> Hapus
                 </button>
               </form>
+              @endif
             </div>
           </td>
         </tr>
@@ -306,12 +345,42 @@
       </tbody>
     </table>
   </div>
-  <div class="card-body py-2">
-    {{ isset($list) ? $list->links() : '' }}
-  </div>
+  <div class="card-body py-2">{{ $isPaginator ? $list->links() : '' }}</div>
 </div>
 
-{{-- MODAL TAMBAH --}}
+{{-- ===== MODAL CETAK LAPORAN HARIAN ===== --}}
+@if (Route::has('laporan.harian'))
+<div class="modal fade" id="modalCetak" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <form class="modal-content" method="GET" action="{{ route('laporan.harian') }}" target="_blank">
+      <div class="modal-header">
+        <h5 class="modal-title">Cetak Laporan Harian</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+          <label class="form-label">Dari</label>
+          <input type="date" name="from" class="form-control" value="{{ now()->toDateString() }}">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Sampai</label>
+          <input type="date" name="to" class="form-control" value="{{ now()->toDateString() }}">
+        </div>
+        <div class="form-check mt-1">
+          <input class="form-check-input" type="checkbox" value="1" id="stream" name="stream" checked>
+          <label class="form-check-label" for="stream">Buka di tab (tidak langsung download)</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-success"><i class="bi bi-check2 me-1"></i> Cetak</button>
+      </div>
+    </form>
+  </div>
+</div>
+@endif
+
+{{-- ===== MODAL TAMBAH USER ===== --}}
+@if (Route::has('users.store'))
 <div class="modal fade" id="modalTambah" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -349,8 +418,9 @@
     </div>
   </div>
 </div>
+@endif
 
-{{-- MODAL EDIT --}}
+{{-- ===== MODAL EDIT USER ===== --}}
 <div class="modal fade" id="modalEdit" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
@@ -358,6 +428,7 @@
         <h5 class="modal-title">Edit Data Pengguna</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
+      {{-- action dinamis diisi via JS --}}
       <form method="post" id="formEdit">@csrf @method('PUT')
         <div class="modal-body">
           <div class="mb-3"><label class="form-label">Nama</label><input id="edit-nama" name="nama" class="form-control" required></div>
@@ -405,7 +476,7 @@
   const rowChecks = () => Array.from(document.querySelectorAll('.row-check'));
   checkAll?.addEventListener('change', e => rowChecks().forEach(cb => cb.checked = e.target.checked));
 
-  // Isi modal edit
+  // Modal Edit: isi data & action
   const modalEdit = document.getElementById('modalEdit');
   modalEdit?.addEventListener('show.bs.modal', e => {
     const b = e.relatedTarget, id = b.getAttribute('data-id');
@@ -413,6 +484,7 @@
     document.getElementById('edit-email').value    = b.getAttribute('data-email');
     document.getElementById('edit-role').value     = b.getAttribute('data-role');
     document.getElementById('edit-approval').value = b.getAttribute('data-approval');
+    // set action form edit
     document.getElementById('formEdit').action     = `{{ url('/users') }}/${id}`;
   });
 

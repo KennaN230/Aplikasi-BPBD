@@ -70,8 +70,8 @@
     </button>
 
     <div class="logo-row">
-      <img src="{{ asset('gambar/Logo 1 1.png') }}" alt="BPBD Logo">
-      <img src="{{ asset('gambar/Logo_Kabupaten_Malang 1.png') }}" alt="Kabupaten Malang Logo">
+      <img src="{{ asset('gambar/Logo_Kabupaten_Malang 1.png') }}" alt="BPBD Logo">
+      <img src="{{ asset('gambar/logoBPBD.png') }}" alt="Kabupaten Malang Logo">
     </div>
 
     <h1>Selamat Datang Di Pusat Informasi<br>Kejadian Kabupaten Malang</h1>
