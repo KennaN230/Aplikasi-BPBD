@@ -10,33 +10,39 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    // Menentukan nama tabel yang digunakan
-    protected $table = 'userr'; // Ganti 'users' dengan 'Userr'
+    protected $table = 'userr';
+    protected $primaryKey = 'id_user';
+    public $timestamps = true; // created_at & updated_at ada
 
-    // Primary key
-    protected $primaryKey = 'id_user'; // Pastikan sesuai dengan nama primary key di tabel
+    // kalau tabel tidak punya remember_token
+    public function getRememberTokenName() { return null; }
 
-    // Jika tabel tidak memiliki created_at dan updated_at
-    public $timestamps = false; // Atur ke false jika tabel tidak memiliki kolom created_at dan updated_at
-
-    // Kolom yang dapat diisi (mass-assignable)
     protected $fillable = [
-        'nama',
-        'email',
-        'password',
-        'role',
-        'no_hp',
-        'photo',
+        'nama','email','password','role','no_hp','photo',
+        'status','approved_at','approved_by',
+        'last_seen_at',               // <- TAMBAHKAN INI
     ];
 
-    // Kolom yang harus disembunyikan ketika serialisasi
-    protected $hidden = [
-        'password',
+    protected $attributes = [
+        'status' => 'pending',
     ];
 
-    // Enkripsi password
-    // public function setPasswordAttribute($value)
-    // {
-    //     $this->attributes['password'] = bcrypt($value);
-    // }
+    protected $casts = [
+        'password'     => 'hashed',
+        'approved_at'  => 'datetime',
+        'last_seen_at' => 'datetime', // <- DAN INI
+    ];
+
+    public function approver()
+    {
+        return $this->belongsTo(self::class, 'approved_by', 'id_user');
+    }
+
+    public function isApproved(): bool
+    {
+        return strtolower((string) $this->status) === 'approved';
+    }
+
+    public function scopeApproved($q){ return $q->where('status','approved'); }
+    public function scopePending($q){ return $q->where('status','pending'); }
 }
