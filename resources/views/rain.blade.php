@@ -297,10 +297,10 @@
         <option value="tidak_hujan">Hari Tidak Hujan</option>
         <option value="keduanya">Keduanya</option>
       </select>
-      <!-- Tombol Cetak Grafik PDF -->
-      <a href="{{ route('rainpdfgrafik') }}" target="_blank" class="btn-pdf">
-    Cetak PDF Grafik
+      <a href="{{ route('rainpdfgrafik', request()->all()) }}" target="_blank" class="btn-pdf">
+  Cetak PDF Grafik
 </a>
+
     </div>
   </div>
 
@@ -400,8 +400,8 @@ const hujan = labels.map(kec => mergedData[kec].hujan);
 const tidak_hujan = labels.map(kec => mergedData[kec].tidak_hujan);
 
   // Inisialisasi Chart.js
-  const ctx = document.getElementById('rainChart').getContext('2d');
-  let rainChart = new Chart(ctx, {
+ const ctx = document.getElementById('rainChart').getContext('2d');
+let rainChart = new Chart(ctx, {
   type: 'bar',
   data: {
     labels: labels,
@@ -424,7 +424,9 @@ const tidak_hujan = labels.map(kec => mergedData[kec].tidak_hujan);
   },
   options: {
     responsive: true,
-    plugins: { legend: { position: 'top' } },
+    plugins: { 
+      legend: { position: 'top' } 
+    },
     scales: {
       x: {
         grid: { display: false },
@@ -433,11 +435,21 @@ const tidak_hujan = labels.map(kec => mergedData[kec].tidak_hujan);
       y: {
         beginAtZero: true,
         grid: { color: '#eee' },
-        ticks: { color: '#122453' }
+        ticks: { 
+          color: '#122453',
+          precision: 0, // ← ini mencegah desimal
+          callback: function(value) {
+            // pastikan hanya angka bulat yang ditampilkan
+            if (Number.isInteger(value)) {
+              return value;
+            }
+          }
+        }
       }
     }
   }
 });
+
 
   // Ubah dataset berdasarkan pilihan
   document.getElementById('dataType').addEventListener('change', function() {

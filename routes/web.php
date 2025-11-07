@@ -53,3 +53,14 @@ Route::controller(AuthController::class)->group(function () {
     Route::get('/lupa-password', 'showForgotPasswordForm')->name('password.request');
     Route::post('/lupa-password', 'sendResetLinkEmail')->name('password.email');
 });
+
+use App\Http\Controllers\GelombangController;
+
+
+
+// 💡 TARUH DUA ROUTE INI SEBELUM resource!
+Route::get('/gelombang/cetakpdf', [GelombangController::class, 'gelombangpdf'])->name('gelombang.cetakpdf');
+Route::get('/gelombang/pdfgrafik', [GelombangController::class, 'pdfgrafik'])->name('gelombang.pdfgrafik');
+
+// Baru ini di bawah
+Route::resource('gelombang', GelombangController::class);
