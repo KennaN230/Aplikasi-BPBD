@@ -239,18 +239,10 @@
       <tbody>
       @forelse($items as $it)
         @php
-    $docUrl = $it->dokumentasi_path ? asset('storage/'.$it->dokumentasi_path) : null;
-    $isImg  = $it->dokumentasi_path 
-              ? in_array(strtolower(pathinfo($it->dokumentasi_path, PATHINFO_EXTENSION)), ['jpg','jpeg','png','webp'])
-              : false;
-@endphp
-@if($docUrl)
-    @if($isImg)
-        <img src="{{ $docUrl }}" alt="Dokumentasi" style="max-width:150px">
-    @else
-        <a href="{{ $docUrl }}" target="_blank">Lihat Dokumen</a>
-    @endif
-@endif
+          $mime   = $it->dokumentasi_mime ?? '';
+          $isImg  = Str::startsWith($mime,'image/');
+          $docUrl = !empty($it->dokumentasi_path) ? asset('storage/'.$it->dokumentasi_path) : null;
+        @endphp
         <tr>
           <td><input type="checkbox" class="row-check" value="{{ $it->id }}"></td>
           <td class="nowrap">{{ $it->tanggal ? \Carbon\Carbon::parse($it->tanggal)->format('d/m/Y') : '' }}</td>
@@ -261,24 +253,18 @@
           <td><div class="clip-2">{{ $it->rekomendasi }}</div></td>
 
           <td class="nowrap">
-@php
-    $docUrl = $it->dokumentasi_path ? asset('storage/'.$it->dokumentasi_path) : null;
-    $ext    = strtolower(pathinfo($it->dokumentasi_path ?? '', PATHINFO_EXTENSION));
-    $isImg  = in_array($ext, ['jpg','jpeg','png','webp']);
-@endphp
-
-@if($docUrl)
-    @if($isImg)
-        <img src="{{ $docUrl }}" alt="doc" class="thumb-doc" style="height:80px; max-width:100%">
-    @else
-        <a class="btn btn-outline-primary btn-sm" href="{{ $docUrl }}" target="_blank">
-            <i class="bi bi-file-earmark-text me-1"></i> Lihat dokumen
-        </a>
-    @endif
-@else
-    <span class="text-muted">—</span>
-@endif
-</td>
+            @if($docUrl)
+              @if($isImg)
+                <a href="{{ $docUrl }}" target="_blank"><img class="thumb-doc" src="{{ $docUrl }}" alt="doc"></a>
+              @else
+                <a class="btn btn-outline-primary btn-sm" href="{{ $docUrl }}" target="_blank">
+                  <i class="bi bi-file-earmark-text me-1"></i> Lihat
+                </a>
+              @endif
+            @else
+              <span class="text-muted">—</span>
+            @endif
+          </td>
 
           <td class="text-nowrap">
             {{-- DETAIL --}}
@@ -386,9 +372,9 @@
             <label class="form-label">Dokumentasi (ganti – opsional)</label>
             <input type="file" name="dokumentasi" class="form-control" accept="image/*,application/pdf">
             <div id="currentDocWrap" class="mt-2" style="display:none">
-  <span class="small text-muted me-2">Saat ini:</span>
-  <a id="currentDocLink" href="#" target="_blank" class="align-middle"></a>
-</div>
+              <span class="small text-muted me-2">Saat ini:</span>
+              <a id="currentDocLink" href="#" target="_blank" class="align-middle"></a>
+            </div>
           </div>
         </div>
       </div>
@@ -442,16 +428,17 @@
           <div class="col-12">
             <div class="small text-muted mb-1">Dokumentasi</div>
             <div id="dDocWrap" style="display:none">
-  <a id="dDocLink" href="#" target="_blank" class="d-inline-block">
-    <img id="dDocImg" src="#" alt="dokumentasi"
-         style="max-width:100%;height:auto;max-height:320px;border-radius:8px;border:1px solid #e6e8ee;object-fit:cover">
-  </a>
-  <a id="dDocFile" href="#" target="_blank" class="btn btn-outline-primary btn-sm mt-2" style="display:none">
-    <i class="bi bi-file-earmark-text me-1"></i> Lihat dokumen
-  </a>
-</div>
-<div id="dDocNone" class="text-muted">—</div>
-
+              {{-- anchor untuk gambar --}}
+              <a id="dDocLink" href="#" target="_blank" class="d-inline-block">
+                <img id="dDocImg" src="#" alt="dokumentasi"
+                     style="max-width:100%;height:auto;max-height:320px;border-radius:8px;border:1px solid #e6e8ee;object-fit:cover">
+              </a>
+              {{-- tombol untuk file non-gambar --}}
+              <a id="dDocFile" href="#" target="_blank" class="btn btn-outline-primary btn-sm mt-2" style="display:none">
+                <i class="bi bi-file-earmark-text me-1"></i> Lihat dokumen
+              </a>
+            </div>
+            <div id="dDocNone" class="text-muted">—</div>
           </div>
         </div>
       </div>
@@ -499,86 +486,83 @@
 
   // Modal Edit
   document.getElementById('modalEdit')?.addEventListener('show.bs.modal', e => {
-  const b = e.relatedTarget;
-  const f = document.getElementById('formEdit');
-  const id = b.getAttribute('data-id');
+    const b = e.relatedTarget, f = document.getElementById('formEdit'), id = b.getAttribute('data-id');
+    f.action = `{{ url('/aktivitas-gunung') }}/${id}`;
+    f.tanggal.value            = b.getAttribute('data-tanggal') || '';
+    f.gunung.value             = b.getAttribute('data-gunung') || '';
+    f.meteorologi.value        = b.getAttribute('data-meteorologi') || '';
+    f.visual.value             = b.getAttribute('data-visual') || '';
+    f.aktivitas_vulkanik.value = b.getAttribute('data-aktivitas_vulkanik') || '';
+    f.rekomendasi.value        = b.getAttribute('data-rekomendasi') || '';
 
-  f.action = `{{ url('/aktivitas-gunung') }}/${id}`;
-  f.tanggal.value            = b.getAttribute('data-tanggal') || '';
-  f.gunung.value             = b.getAttribute('data-gunung') || '';
-  f.meteorologi.value        = b.getAttribute('data-meteorologi') || '';
-  f.visual.value             = b.getAttribute('data-visual') || '';
-  f.aktivitas_vulkanik.value = b.getAttribute('data-aktivitas_vulkanik') || '';
-  f.rekomendasi.value        = b.getAttribute('data-rekomendasi') || '';
-
-  // --- Dokumentasi langsung tampil ---
-  const url   = b.getAttribute('data-docurl');
-const isImg = b.getAttribute('data-docisimg') === '1';
-const wrap  = document.getElementById('currentDocWrap');
-const link  = document.getElementById('currentDocLink');
-
-if (url) {
-    wrap.style.display = 'block';
-    if (isImg) {
-        link.innerHTML = `<img src="${url}" class="thumb-doc" style="height:120px; max-width:100%">`;
-        link.href = url;
-    } else {
-        link.innerHTML = `<i class="bi bi-file-earmark-text me-1"></i> Lihat dokumen`;
-        link.href = url;
+    const url = b.getAttribute('data-docurl') || '';
+    const isImg = b.getAttribute('data-docisimg') === '1';
+    const wrap = document.getElementById('currentDocWrap');
+    const link = document.getElementById('currentDocLink');
+    if (wrap && link){
+      if (url){
+        wrap.style.display = 'block';
+        if (isImg){
+          link.innerHTML = `<img class="thumb-doc" src="${url}" alt="dokumentasi">`;
+          link.href = url;
+        }else{
+          link.textContent = 'Lihat dokumen';
+          link.href = url;
+        }
+      }else{
+        wrap.style.display = 'none';
+        link.removeAttribute('href');
+        link.textContent = '';
+      }
     }
-} else {
-    wrap.style.display = 'none';
-    link.removeAttribute('href');
-    link.innerHTML = '';
-}
-});
+  });
 
   // ===== Modal DETAIL =====
   const nl2br = (s) => (s || '').replace(/\r?\n/g, '<br>');
   document.getElementById('modalDetail')?.addEventListener('show.bs.modal', (e) => {
-  const b   = e.relatedTarget;
-  const get = (name) => b.getAttribute(name) || '';
+    const b   = e.relatedTarget;
+    const get = (name) => b.getAttribute(name) || '';
 
-  const nl2br = s => (s||'').replace(/\r?\n/g,'<br>');
+    document.getElementById('dTanggal').textContent   = get('data-tanggal');
+    document.getElementById('dGunung').textContent    = get('data-gunung');
+    document.getElementById('dMeteorologi').innerHTML = nl2br(get('data-meteorologi'));
+    document.getElementById('dVisual').innerHTML      = nl2br(get('data-visual'));
+    document.getElementById('dAktivitas').innerHTML   = nl2br(get('data-aktivitas'));
+    document.getElementById('dRekomendasi').innerHTML = nl2br(get('data-rekomendasi'));
 
-  document.getElementById('dTanggal').textContent   = get('data-tanggal');
-  document.getElementById('dGunung').textContent    = get('data-gunung');
-  document.getElementById('dMeteorologi').innerHTML = nl2br(get('data-meteorologi'));
-  document.getElementById('dVisual').innerHTML      = nl2br(get('data-visual'));
-  document.getElementById('dAktivitas').innerHTML   = nl2br(get('data-aktivitas'));
-  document.getElementById('dRekomendasi').innerHTML = nl2br(get('data-rekomendasi'));
+    const url  = get('data-docurl');
+    const isImg = get('data-docisimg') === '1';
+    const wrap = document.getElementById('dDocWrap');
+    const none = document.getElementById('dDocNone');
+    const link = document.getElementById('dDocLink');  // anchor berisi IMG
+    const img  = document.getElementById('dDocImg');
+    const file = document.getElementById('dDocFile');  // anchor tombol file
 
-  const url   = get('data-docurl');
-  const isImg = get('data-docisimg') === '1';
-  const wrap  = document.getElementById('dDocWrap');
-  const none  = document.getElementById('dDocNone');
-  const img   = document.getElementById('dDocImg');
-  const link  = document.getElementById('dDocLink');
-  const file  = document.getElementById('dDocFile');
+    if (url){
+      none.style.display = 'none';
+      wrap.style.display = 'block';
+      link.href = url;
+      file.href = url;
 
-  if(url){
-    none.style.display = 'none';
-    wrap.style.display = 'block';
-
-    if(isImg){
+      if (isImg){
         img.src = url;
         img.style.display = '';
         link.style.display = 'inline-block';
         file.style.display = 'none';
-    } else {
+      }else{
+        img.removeAttribute('src');
         img.style.display = 'none';
         link.style.display = 'none';
-        file.href = url;
         file.style.display = 'inline-block';
+      }
+    }else{
+      wrap.style.display = 'none';
+      none.style.display = 'block';
+      img.removeAttribute('src');
+      link.removeAttribute('href');
+      file.removeAttribute('href');
+      file.style.display = 'none';
     }
-} else {
-    wrap.style.display = 'none';
-    none.style.display = 'block';
-    img.removeAttribute('src');
-    link.removeAttribute('href');
-    file.removeAttribute('href');
-    file.style.display = 'none';
-}
-});
+  });
 </script>
 @endpush

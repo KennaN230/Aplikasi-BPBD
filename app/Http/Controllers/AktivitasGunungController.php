@@ -47,18 +47,22 @@ class AktivitasGunungController extends Controller
             'visual'             => ['nullable','string'],
             'aktivitas_vulkanik' => ['nullable','string'],
             'rekomendasi'        => ['nullable','string'],
-            'dokumentasi'        => ['nullable','file','mimes:jpg,jpeg,png,webp,pdf','max:20480'],
+            'dokumentasi'        => ['nullable','file','max:20480'],
         ]);
 
         if ($r->hasFile('dokumentasi') && $r->file('dokumentasi')->isValid()) {
-            $file = $r->file('dokumentasi');
-            $path = $file->store('aktivitas-gunung', 'public');
+    $file = $r->file('dokumentasi');
 
-            $data['dokumentasi_path'] = $path;
-            $data['dokumentasi_mime'] = $file->getMimeType();
-            $data['dokumentasi_name'] = $file->getClientOriginalName();
-            $data['dokumentasi_size'] = $file->getSize();
-        }
+    $ext = strtolower($file->getClientOriginalExtension());
+    $isImg = in_array($ext, ['jpg','jpeg','png','webp']); // flag gambar
+
+    $path = $file->store('aktivitas-gunung', 'public');
+
+    $data['dokumentasi_path']    = $path;
+    $data['dokumentasi_name']    = $file->getClientOriginalName();
+    $data['dokumentasi_size']    = $file->getSize();
+    $data['dokumentasi_is_image'] = $isImg; // cukup pakai ini
+}
 
         AktivitasGunung::create($data);
 
@@ -68,28 +72,28 @@ class AktivitasGunungController extends Controller
     public function update(Request $r, AktivitasGunung $aktivitas_gunung)
     {
         $data = $r->validate([
-            'tanggal'            => ['required','date'],
-            'gunung'             => ['nullable','string','max:150'],
-            'meteorologi'        => ['nullable','string'],
-            'visual'             => ['nullable','string'],
-            'aktivitas_vulkanik' => ['nullable','string'],
-            'rekomendasi'        => ['nullable','string'],
-            'dokumentasi'        => ['nullable','file','mimes:jpg,jpeg,png,webp,pdf','max:20480'],
-        ]);
+    'tanggal'            => ['required','date'],
+    'gunung'             => ['nullable','string','max:150'],
+    'meteorologi'        => ['nullable','string'],
+    'visual'             => ['nullable','string'],
+    'aktivitas_vulkanik' => ['nullable','string'],
+    'rekomendasi'        => ['nullable','string'],
+    'dokumentasi'        => ['nullable','file','max:20480'], // hapus mimes
+]);
 
-        if ($r->hasFile('dokumentasi') && $r->file('dokumentasi')->isValid()) {
-            if ($aktivitas_gunung->dokumentasi_path) {
-                Storage::disk('public')->delete($aktivitas_gunung->dokumentasi_path);
-            }
+if ($r->hasFile('dokumentasi') && $r->file('dokumentasi')->isValid()) {
+    $file = $r->file('dokumentasi');
 
-            $file = $r->file('dokumentasi');
-            $path = $file->store('aktivitas-gunung', 'public');
+    $ext = strtolower($file->getClientOriginalExtension());
+    $isImg = in_array($ext, ['jpg','jpeg','png','webp']); // flag gambar
 
-            $data['dokumentasi_path'] = $path;
-            $data['dokumentasi_mime'] = $file->getMimeType();
-            $data['dokumentasi_name'] = $file->getClientOriginalName();
-            $data['dokumentasi_size'] = $file->getSize();
-        }
+    $path = $file->store('aktivitas-gunung', 'public');
+
+    $data['dokumentasi_path']    = $path;
+    $data['dokumentasi_name']    = $file->getClientOriginalName();
+    $data['dokumentasi_size']    = $file->getSize();
+    $data['dokumentasi_is_image'] = $isImg; // cukup pakai ini
+}
 
         $aktivitas_gunung->update($data);
 

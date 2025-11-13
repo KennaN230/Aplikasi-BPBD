@@ -10,23 +10,24 @@
         }
 
         /* --- KOP SURAT --- */
-        .kop-container {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .kop-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: none;
             border-bottom: 3px solid #000;
-            padding-bottom: 10px;
             margin-bottom: 20px;
+            padding-bottom: 10px;
+        }
+
+        .kop-table td {
+            border: none !important;
+            vertical-align: middle;
+            text-align: center;
         }
 
         .kop-logo {
-            width: 90px;
-            height: auto;
-        }
-
-        .kop-text {
-            text-align: center;
-            flex-grow: 1;
+            width: auto;
+            height: 90px;
         }
 
         .kop-text h2 {
@@ -89,26 +90,31 @@
 <body onload="window.print()">
 
     {{-- KOP SURAT --}}
-    <div class="kop-container">
-    @if($logo1)
-        <img src="data:image/png;base64,{{ $logo1 }}" alt="Logo Kiri" class="kop-logo">
-    @endif
-    <div class="kop-text">
-        <h2>PEMERINTAH KABUPATEN MALANG</h2>
-        <h3>BADAN PENANGGULANGAN BENCANA DAERAH</h3>
-        <p>Jalan Trunojoyo Kepanjen, Kabupaten Malang, Jawa Timur</p>
-        <p>Telepon/ Faksimile (0341) 392121 Laman : bpbd.malangkab.go.id</p>
-        <p>Pos-el : bpbd@malangkab.go.id, Kode Pos : 65163</p>
-    </div>
-    @if($logo2)
-        <img src="data:image/png;base64,{{ $logo2 }}" alt="Logo Kanan" class="kop-logo">
-    @endif
-</div>
-
+    <table class="kop-table">
+        <tr>
+            <td style="width: 15%; text-align: left;">
+                @if($logo1)
+                    <img src="data:image/png;base64,{{ $logo1 }}" alt="Logo Kiri" class="kop-logo">
+                @endif
+            </td>
+            <td style="width: 70%;" class="kop-text">
+                <h2>PEMERINTAH KABUPATEN MALANG</h2>
+                <h3>BADAN PENANGGULANGAN BENCANA DAERAH</h3>
+                <p>Jalan Trunojoyo Kepanjen, Kabupaten Malang, Jawa Timur</p>
+                <p>Telepon/ Faksimile (0341) 392121 Laman : bpbd.malangkab.go.id</p>
+                <p>Pos-el : bpbd@malangkab.go.id, Kode Pos : 65163</p>
+            </td>
+            <td style="width: 15%; text-align: right;">
+                @if($logo2)
+                    <img src="data:image/png;base64,{{ $logo2 }}" alt="Logo Kanan" class="kop-logo">
+                @endif
+            </td>
+        </tr>
+    </table>
 
     {{-- JUDUL --}}
     <div class="judul">
-        <h2>LAPORAN HARI HUJAN DAN TIDAK HUJAN</h2>
+        <h2>LAPORAN KEJADIAN GEMPA BUMI</h2>
         @php
             if (str_contains($tanggal, 's/d')) {
                 [$start, $end] = explode(' s/d ', $tanggal);
@@ -124,38 +130,40 @@
 
     {{-- TABEL DATA --}}
     <table>
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Tanggal</th>
-                <th>Kecamatan</th>
-                <th>Hari Hujan</th>
-                <th>Hari Tidak Hujan</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($data as $i => $item)
-            <tr>
-                <td>{{ $i+1 }}</td>
-                <td>{{ \Carbon\Carbon::parse($item->hari_tanggal)->translatedFormat('d F Y') }}</td>
-                <td>{{ $item->kecamatan }}</td>
-                <td>{{ $item->hari_hujan }}</td>
-                <td>{{ $item->hari_tidak_hujan }}</td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="5">Data tidak ditemukan</td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>Tanggal</th>
+            <th>SR</th>
+            <th>Waktu</th>
+            <th>Lokasi Gempa</th>
+            <th>Keterangan</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse($kejadian as $i => $item)
+        <tr>
+            <td>{{ $i+1 }}</td>
+            <td>{{ \Carbon\Carbon::parse($item->hari_tanggal)->translatedFormat('d F Y') }}</td>
+            <td>{{ $item->sr ?? '-' }}</td>
+            <td>{{ $item->waktu ?? '-' }}</td>
+            <td>{{ $item->lokasi_gempa ?? '-' }}</td>
+            <td>{{ $item->keterangan ?? '-' }}</td>
+        </tr>
+        @empty
+        <tr>
+            <td colspan="6">Data tidak ditemukan</td>
+        </tr>
+        @endforelse
+    </tbody>
+</table>
 
     {{-- TANDA TANGAN --}}
     <div class="ttd">
         <p>Malang, {{ now()->translatedFormat('d F Y') }}</p>
         <p>Kepala BPBD Kabupaten Malang</p>
         <br><br><br>
-        <p><u>____________________</u></p>
+        <p><u></u></p>
         <p>NIP. 19650101 199001 1 001</p>
     </div>
 

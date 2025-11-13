@@ -61,13 +61,22 @@
     /* --- CHART --- */
     .chart-wrap {
       width: 100%;
-      max-width: 900px;
+      max-width: 1200px; /* diperlebar biar label muat */
       margin: 0 auto;
+      text-align: center;
     }
 
     canvas {
+      display: block;
+      margin: 0 auto;
       width: 100% !important;
-      height: 420px !important;
+      height: 480px !important;
+    }
+
+    #chartImage {
+      display: none;
+      max-width: 900px;
+      margin: 20px auto;
     }
 
     /* --- TANDA TANGAN --- */
@@ -81,9 +90,14 @@
     .ttd p {
       margin: 5px 0;
     }
+
+    @media print {
+      canvas { display: none !important; }
+      #chartImage { display: block !important; }
+    }
   </style>
 </head>
-<body onload="window.print()">
+<body>
 
   {{-- KOP SURAT --}}
   <div class="kop-container">
@@ -110,13 +124,19 @@
     <p>
       Periode:
       @php
+        use Carbon\Carbon;
+        $startDate = null; $endDate = null;
         if (str_contains($tanggal, 's/d')) {
             [$start, $end] = explode(' s/d ', $tanggal);
-            $startDate = \Carbon\Carbon::parse($start)->translatedFormat('d F Y');
-            $endDate   = \Carbon\Carbon::parse($end)->translatedFormat('d F Y');
+            try {
+                $startDate = Carbon::parse($start)->translatedFormat('d F Y');
+                $endDate = Carbon::parse($end)->translatedFormat('d F Y');
+            } catch (\Exception $e) {
+                $startDate = $start;
+                $endDate = $end;
+            }
         } else {
-            $startDate = \Carbon\Carbon::parse($tanggal)->translatedFormat('d F Y');
-            $endDate   = null;
+            $startDate = $tanggal;
         }
       @endphp
       {{ $startDate }} @if($endDate) s/d {{ $endDate }} @endif
@@ -126,6 +146,7 @@
   {{-- CHART --}}
   <div class="chart-wrap">
     <canvas id="rainChart"></canvas>
+    <img id="chartImage" alt="Grafik Hujan">
   </div>
 
   {{-- TANDA TANGAN --}}
@@ -138,40 +159,59 @@
   </div>
 
   <script>
+    // Label kabupaten (bukan tanggal)
     const labels = @json($kejadian->pluck('kecamatan'));
-    const dataHujan = @json($kejadian->pluck('hari_hujan'));
-    const dataTidakHujan = @json($kejadian->pluck('hari_tidak_hujan'));
+    const dataHujan = @json($kejadian->pluck('total_hari_hujan'));
+    const dataTidakHujan = @json($kejadian->pluck('total_hari_tidak_hujan'));
 
     const ctx = document.getElementById('rainChart').getContext('2d');
-    new Chart(ctx, {
+    const chart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels: labels,
         datasets: [
-          {
-            label: 'Hari Hujan',
-            data: dataHujan,
-            backgroundColor: '#859fe4ff', 
-          },
-          {
-            label: 'Hari Tidak Hujan',
-            data: dataTidakHujan,
-            backgroundColor: '#4636a2ff',
-          }
+          { label: 'Hari Hujan', data: dataHujan, backgroundColor: '#859fe4' },
+          { label: 'Hari Tidak Hujan', data: dataTidakHujan, backgroundColor: '#4636a2' }
         ]
       },
       options: {
         responsive: true,
         plugins: {
           legend: { position: 'top' },
-          title: { display: true, text: 'Hari Hujan per Kecamatan' }
+          title: { display: true, text: 'Jumlah Hari Hujan per Kabupaten' }
         },
         scales: {
-          x: { beginAtZero: true },
-          y: { beginAtZero: true }
+          x: { 
+            beginAtZero: true,
+            title: { display: true, text: 'Kabupaten' },
+            ticks: {
+              maxRotation: 60, // rotasi label
+              minRotation: 45,
+              autoSkip: false, // tampilkan semua nama kabupaten
+              font: { size: 12 }
+            }
+          },
+          y: { 
+            beginAtZero: true,
+            title: { display: true, text: 'Jumlah Hari' },
+            ticks: { stepSize: 1 }
+          }
         }
       }
     });
+
+    // Konversi chart ke gambar PNG setelah render
+    chart.options.animation.onComplete = () => {
+      const img = document.getElementById('chartImage');
+      img.src = chart.toBase64Image('image/png', 1.0);
+    };
+
+    // Cetak otomatis setelah chart selesai
+    window.onload = () => {
+      setTimeout(() => {
+        window.print();
+      }, 1200);
+    };
   </script>
 
 </body>

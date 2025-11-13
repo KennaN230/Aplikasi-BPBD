@@ -7,92 +7,81 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-    <div class="max-w-5xl mx-auto bg-white shadow rounded-lg p-6">
-        <h2 class="text-xl font-bold mb-4">Tambah Kejadian</h2>
+    <div class="container my-4">
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-primary text-white fw-bold">
+            <i class="bi bi-plus-circle"></i> Tambah Kejadian
+        </div>
+        <div class="card-body">
+            <form id="formKejadian" action="{{ route('kejadian.store') }}" method="POST" enctype="multipart/form-data">
+                @csrf
 
-        <form id="formKejadian" action="{{ route('kejadian.store') }}" method="POST" enctype="multipart/form-data">
-        @csrf
+                {{-- === Jenis Bencana === --}}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Jenis Bencana</label>
+                    <select name="id_jenis_bencana" id="id_jenis_bencana" class="form-select" required>
+                        <option value="">-- Pilih Jenis Bencana --</option>
+                        @foreach($jenisBencana as $jb)
+                            <option value="{{ $jb->id_jenis_bencana }}">{{ $jb->jenis_bencana }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
+    {{-- === Nama Kejadian === --}}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Nama Kejadian</label>
+                    <select name="id_nama_kejadian" class="form-select" required>
+                        <option value="">-- Pilih Nama Kejadian --</option>
+                        @foreach($namaKejadian as $nk)
+                            <option value="{{ $nk->id_nama_kejadian }}">{{ $nk->nama_kejadian }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-            {{-- === Pilih Jenis Bencana === --}}
-    <div class="mb-4">
-        <label class="block font-medium">Jenis Bencana</label>
-        <select name="id_jenis_bencana" id="id_jenis_bencana" class="w-full border rounded px-3 py-2" required>
-            <option value="">-- Pilih Jenis Bencana --</option>
-            @foreach($jenisBencana as $jb)
-                <option value="{{ $jb->id_jenis_bencana }}">
-                    {{ $jb->jenis_bencana }}
-                </option>
-            @endforeach
-        </select>
-    </div>
+                {{-- === Tanggal & Waktu === --}}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Tanggal</label>
+                        <input type="date" id="tanggal" name="tanggal" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Waktu</label>
+                        <input type="time" name="waktu" class="form-control">
+                    </div>
+                </div>
 
-    {{-- === Pilih Nama Kejadian === --}}
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Nama Kejadian</label>
-        <select name="id_nama_kejadian" class="w-full border rounded px-3 py-2" required>
-            <option value="">-- Pilih Nama Kejadian --</option>
-            @foreach($namaKejadian as $nk)
-                <option value="{{ $nk->id_nama_kejadian }}">
-                    {{ $nk->nama_kejadian }}
-                </option>
-            @endforeach
-        </select>
-    </div>
+            {{-- === Provinsi & Kabupaten === --}}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Provinsi</label>
+                        <input type="text" value="{{ $provinsi->nama_provinsi ?? 'Jawa Timur' }}" class="form-control bg-light" readonly>
+                        <input type="hidden" name="id_provinsi" value="{{ $provinsi->id_provinsi ?? 1 }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Kabupaten</label>
+                        <input type="text" value="{{ $kabupaten->nama_kabupaten ?? 'Kabupaten Malang' }}" class="form-control bg-light" readonly>
+                        <input type="hidden" name="id_kabupaten" value="{{ $kabupaten->id_kabupaten ?? 1 }}">
+                    </div>
+                </div>
 
-
-
-            {{-- tanggal --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Tanggal</label>
-                <input type="date" id="tanggal" name="tanggal" class="w-full border rounded px-3 py-2"> 
-            </div>
-
-            {{-- waktu --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Waktu</label>
-                <input type="time" name="waktu" class="w-full border rounded px-3 py-2">
-            </div>
-
-            {{-- Provinsi --}}
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Provinsi</label>
-        <input type="text"
-            value="{{ $provinsi->nama_provinsi ?? 'Jawa Timur' }}"
-            class="w-full border rounded px-3 py-2 bg-gray-100"
-            readonly>
-        <input type="hidden" name="id_provinsi" value="{{ $provinsi->id_provinsi ?? 1 }}">
-    </div>
-
-    {{-- Kabupaten --}}
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Kabupaten</label>
-        <input type="text"
-            value="{{ $kabupaten->nama_kabupaten ?? 'Kabupaten Malang' }}"
-            class="w-full border rounded px-3 py-2 bg-gray-100"
-            readonly>
-        <input type="hidden" name="id_kabupaten" value="{{ $kabupaten->id_kabupaten ?? 1 }}">
-    </div>
-
-            {{-- Kecamatan --}}
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Kecamatan</label>
-        <select name="id_kecamatan" id="kecamatan" class="w-full border rounded px-3 py-2" required>
-            <option value="">-- Pilih Kecamatan --</option>
-            @foreach($kecamatan as $kec)
-                <option value="{{ $kec->id_kecamatan }}">{{ $kec->kecamatan }}</option>
-            @endforeach
-        </select>
-    </div>
-
-
-    {{-- Desa --}}
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Desa</label>
-        <select name="id_desa" id="desa" class="w-full border rounded px-3 py-2" required>
-            <option value="">-- Pilih Desa --</option>
-        </select>
-    </div>
+            {{-- Kecamatan & Desa --}}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Kecamatan</label>
+                        <select name="id_kecamatan" id="kecamatan" class="form-select" required>
+                            <option value="">-- Pilih Kecamatan --</option>
+                            @foreach($kecamatan as $kec)
+                                <option value="{{ $kec->id_kecamatan }}">{{ $kec->kecamatan }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Desa</label>
+                        <select name="id_desa" id="desa" class="form-select" required>
+                            <option value="">-- Pilih Desa --</option>
+                        </select>
+                    </div>
+                </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -143,15 +132,16 @@
     });
     </script>
 
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Alamat Lengkap</label>
-        <textarea name="alamat" rows="2" class="w-full border rounded px-3 py-2">{{ old('alamat', $kejadian->alamat ?? '') }}</textarea>
-    </div>
+    {{-- Alamat --}}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Alamat Lengkap</label>
+                    <textarea name="alamat" rows="2" class="form-control">{{ old('alamat', $kejadian->alamat ?? '') }}</textarea>
+                </div>
 {{-- Peta Lokasi --}}
-<div class="mb-4">
-    <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Lokasi di Peta</label>
-    <div id="map" style="height: 300px; border-radius: 8px;"></div>
-</div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Pilih Lokasi di Peta</label>
+                    <div id="map" style="height: 350px; border-radius: 10px;" class="border"></div>
+                </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -193,101 +183,96 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-    {{-- Latitude --}}
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Latitude</label>
-        <input type="text" id="latitude" name="latitude" class="w-full border rounded px-3 py-2" readonly>
-    </div>
+    {{-- Latitude & Longitude --}}
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Latitude</label>
+                        <input type="text" id="latitude" name="latitude" class="form-control" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Longitude</label>
+                        <input type="text" id="longitude" name="longitude" class="form-control" readonly>
+                    </div>
+                </div>
 
-    {{-- Longitude --}}
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Longitude</label>
-        <input type="text" id="longitude" name="longitude" class="w-full border rounded px-3 py-2" readonly>
-    </div>
+           {{-- Penyebab --}}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Penyebab</label>
+                    <textarea name="penyebab" class="form-control" rows="2"></textarea>
+                </div>
 
-            {{-- penyebab --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Penyebab</label>
-                <textarea name="penyebab" class="w-full border rounded px-3 py-2" rows="2"></textarea>
-            </div>
+                {{-- Kronologi --}}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Kronologi</label>
+                    <textarea name="kronologi" class="form-control" rows="2"></textarea>
+                </div>
 
-            {{-- kronologi --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Kronologi</label>
-                <textarea name="kronologi" class="w-full border rounded px-3 py-2" rows="2"></textarea>
-            </div>
+                {{-- Deskripsi --}}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Deskripsi</label>
+                    <textarea name="deskripsi" class="form-control" rows="2"></textarea>
+                </div>
 
-            {{-- deskripsi --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Deskripsi</label>
-                <textarea name="deskripsi" class="w-full border rounded px-3 py-2" rows="2"></textarea>
-            </div>
+                {{-- Sumber --}}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Sumber</label>
+                    <input type="text" name="sumber" class="form-control">
+                </div>
 
-            {{-- sumber --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Sumber</label>
-                <input type="text" name="sumber" class="w-full border rounded px-3 py-2">
-            </div>
+                {{-- Kondisi Mutakhir --}}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Kondisi Mutakhir</label>
+                    <textarea name="kondisi_mutakhir" class="form-control"></textarea>
+                </div>
 
-            {{-- kondisi_mutakhir --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Kondisi Mutakhir</label>
-                <textarea name="kondisi_mutakhir" class="w-full border rounded px-3 py-2"></textarea>
-            </div>
-
-            {{-- id_status_darurat --}}
-            <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700">Status Darurat</label>
-        <select name="id_status_darurat" class="w-full border rounded px-3 py-2">
-            <option value="">-- Pilih Status Darurat --</option>
-            @foreach($statusDarurat as $status)
-                <option value="{{ $status->id_status_darurat }}">
-                    {{ $status->status }}
-                </option>
-            @endforeach
-        </select>
-    </div>
+            {{-- Status Darurat --}}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Status Darurat</label>
+                    <select name="id_status_darurat" class="form-select">
+                        <option value="">-- Pilih Status Darurat --</option>
+                        @foreach($statusDarurat as $status)
+                            <option value="{{ $status->id_status_darurat }}">{{ $status->status }}</option>
+                        @endforeach
+                    </select>
+                </div>
 
 
-            {{-- upaya --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Upaya</label>
-                <textarea name="upaya" class="w-full border rounded px-3 py-2" rows="2"></textarea>
-            </div>
+            {{-- Upaya --}}
+<div class="mb-3">
+    <label class="form-label fw-semibold">Upaya</label>
+    <textarea name="upaya" class="form-control" rows="2" placeholder=""></textarea>
+</div>
 
-            {{-- logistik --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Logistik</label>
-                <input type="text" name="logistik" class="w-full border rounded px-3 py-2">
-            </div>
+{{-- Logistik --}}
+<div class="mb-3">
+    <label class="form-label fw-semibold">Logistik</label>
+    <input type="text" name="logistik" class="form-control" placeholder="">
+</div>
 
-            {{-- dokumentasi --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Dokumentasi</label>
-                <input type="file" name="dokumentasi" class="w-full border rounded px-3 py-2">
-            </div>
+{{-- Dokumentasi --}}
+<div class="mb-3">
+    <label class="form-label fw-semibold">Dokumentasi</label>
+    <input type="file" name="dokumentasi" class="form-control">
+    <div class="form-text text-muted">Unggah foto atau dokumen pendukung (jika ada)</div>
+</div>
 
-            {{-- sebaran_dampak --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Sebaran Dampak</label>
-                <textarea name="sebaran_dampak" class="w-full border rounded px-3 py-2" rows="2"></textarea>
-            </div>
+{{-- Sebaran Dampak --}}
+<div class="mb-3">
+    <label class="form-label fw-semibold">Sebaran Dampak</label>
+    <textarea name="sebaran_dampak" class="form-control" rows="2" placeholder="."></textarea>
+</div>
+
 
             <input type="hidden" id="index_kejadian" name="index_kejadian" value="">
 
-            {{-- kib --}}
-            <div class="mb-4">
-    <label class="block text-sm font-medium text-gray-700 mb-1">Kode Indeks Bencana (KIB)</label>
-    <div class="flex gap-2">
-        <input type="text" name="kib" id="kib"
-            readonly
-            class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2 flex-1 bg-gray-100">
-        <button type="button" id="generate-kib"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded">
-            Generate
-        </button>
-    </div>
-</div>
+            {{-- Kode Indeks Bencana (KIB) --}}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Kode Indeks Bencana (KIB)</label>
+                    <div class="input-group">
+                        <input type="text" name="kib" id="kib" class="form-control bg-light" readonly>
+                        <button type="button" id="generate-kib" class="btn btn-outline-primary">Generate</button>
+                    </div>
+                </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -341,212 +326,255 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
             {{-- Unsur --}}
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700">Unsur yang terlibat</label>
-                <textarea name="unsur" class="w-full border rounded px-3 py-2" rows="2"></textarea>
-            </div>
-
-            {{-- === Data Korban === --}}
-    <h2 class="font-bold mt-6 mb-2">Data Korban</h2>
-
-    <div id="korban-wrapper">
-        <div class="korban-item border rounded p-3 mb-3">
-            <div class="mb-4">
-                <label class="block text-sm font-medium">Kategori Korban</label>
-                <select name="korban[0][id_kategori_korban]" class="w-full border rounded px-3 py-2">
-                    @foreach($kategoriKorban as $k)
-                        <option value="{{ $k->id_kategori_korban }}">{{ $k->kategori_korban }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-sm font-medium">Kategori Umur</label>
-                <select name="korban[0][id_kategori_umur]" class="w-full border rounded px-3 py-2">
-                    @foreach($kategoriUmur as $u)
-                        <option value="{{ $u->id_kategori_umur }}">{{ $u->kategori_umur }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium">Laki-laki</label>
-                    <input type="number" name="korban[0][L]" class="w-full border rounded px-3 py-2" value="0" min="0">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Unsur yang Terlibat</label>
+                    <textarea name="unsur" class="form-control" rows="2"></textarea>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium">Perempuan</label>
-                    <input type="number" name="korban[0][P]" class="w-full border rounded px-3 py-2" value="0" min="0">
-                </div>
-            </div>
-        </div>
-    </div>
 
-    {{-- Tombol Tambah Korban --}}
-    <div class="mb-4">
-        <button type="button" id="add-korban" class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded">
-            + Tambah Korban
-        </button>
-    </div>
+            {{-- Data Korban --}}
+                <hr>
+                <h5 class="fw-bold text-primary mb-3">Data Korban</h5>
+                <div id="korban-wrapper">
+                    <div class="border p-3 mb-3 rounded-3 bg-light korban-item">
+                        <div class="mb-3">
+                            <label class="form-label">Kategori Korban</label>
+                            <select name="korban[0][id_kategori_korban]" class="form-select">
+                                @foreach($kategoriKorban as $k)
+                                    <option value="{{ $k->id_kategori_korban }}">{{ $k->kategori_korban }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Kategori Umur</label>
+                            <select name="korban[0][id_kategori_umur]" class="form-select">
+                                @foreach($kategoriUmur as $u)
+                                    <option value="{{ $u->id_kategori_umur }}">{{ $u->kategori_umur }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <label class="form-label">Laki-laki</label>
+                                <input type="number" name="korban[0][L]" class="form-control" value="0" min="0">
+                            </div>
+                            <div class="col">
+                                <label class="form-label">Perempuan</label>
+                                <input type="number" name="korban[0][P]" class="form-control" value="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end mb-3">
+                    <button type="button" id="add-korban" class="btn btn-success btn-sm">
+                        <i class="bi bi-person-plus"></i> Tambah Korban
+                    </button>
+                </div>
 
     {{-- === Data Rumah === --}}
-    <div class="bg-white shadow rounded-xl p-6 mt-6">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">🏠 Data Rumah</h2>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Rusak Ringan</label>
-                <input type="number" name="rmh_rr" class="w-full border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg px-3 py-2" value="0" min="0">
+<div class="card shadow-sm border-0 rounded-3 mt-4">
+    <div class="card-header bg-light fw-semibold">
+        🏠 Data Rumah
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label fw-semibold">Rusak Ringan</label>
+                <input type="number" name="rmh_rr" class="form-control" value="0" min="0">
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Rusak Sedang</label>
-                <input type="number" name="rmh_rs" class="w-full border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg px-3 py-2" value="0" min="0">
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label fw-semibold">Rusak Sedang</label>
+                <input type="number" name="rmh_rs" class="form-control" value="0" min="0">
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Rusak Berat</label>
-                <input type="number" name="rmh_rb" class="w-full border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg px-3 py-2" value="0" min="0">
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label fw-semibold">Rusak Berat</label>
+                <input type="number" name="rmh_rb" class="form-control" value="0" min="0">
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Terendam</label>
-                <input type="number" name="terendam" class="w-full border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg px-3 py-2" value="0" min="0">
+            <div class="col-md-6 col-lg-3">
+                <label class="form-label fw-semibold">Terendam</label>
+                <input type="number" name="terendam" class="form-control" value="0" min="0">
             </div>
         </div>
     </div>
+</div>
 
-    {{-- === Kerusakan Sosial Ekonomi === --}}
-    <div class="bg-white shadow rounded-xl p-6 mt-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">🏗️ Kerusakan Infrastruktur</h3>
-
-        <div class="grid grid-cols-6 gap-3">
-            <select name="id_jenis_kerusakan_sosek"
-        class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-        <option disabled selected>Pilih Jenis</option>
-        @foreach($jenisKerusakan2 as $jk2)
-            <option value="{{ $jk2->id_jenis_kerusakan_sosek }}">
-                {{ $jk2->jenis_kerusakan_sosek }}
-            </option>
-        @endforeach
-    </select>
-
-            <input type="number" name="sosek[luas]" placeholder="Luas" class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-            <input type="number" name="sosek[rr]" placeholder="Rusak Ringan" class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-            <input type="number" name="sosek[rs]" placeholder="Rusak Sedang" class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-            <input type="number" name="sosek[rb]" placeholder="Rusak Berat" class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-            <input type="number" name="sosek[terendam]" placeholder="Terendam" class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-        </div>
+{{-- === Kerusakan Infrastruktur / Sosial Ekonomi === --}}
+<div class="card shadow-sm border-0 rounded-3 mt-4">
+    <div class="card-header bg-light fw-semibold">
+        🏗️ Kerusakan Infrastruktur
     </div>
-
-    {{-- === Kerusakan Fasilitas Umum === --}}
-    <div class="bg-white shadow rounded-xl p-6 mt-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">🏢 Kerusakan Fasilitas Umum</h3>
-
-        <div class="grid grid-cols-5 gap-3">
-            {{-- Jenis Kerusakan --}}
-            <select name="id_jenis_kerusakan_sarpras"
-        class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-        <option disabled selected>Pilih Jenis</option>
-        @foreach($jenisKerusakan3 as $jk3)
-            <option value="{{ $jk3->id_jenis_kerusakan_sarpras }}">
-                {{ $jk3->jenis_kerusakan_sarpras }}
-            </option>
-        @endforeach
-    </select>
-
-            {{-- Input jumlah kerusakan --}}
-            <input type="number" name="sarpras[rr]" placeholder="Rusak Ringan"
-                class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-            <input type="number" name="sarpras[rs]" placeholder="Rusak Sedang"
-                class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-            <input type="number" name="sarpras[rb]" placeholder="Rusak Berat"
-                class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-            <input type="number" name="sarpras[terendam]" placeholder="Terendam"
-                class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-        </div>
-    </div>
-
-    {{-- === Kerusakan Fasilitas Pendidikan === --}}
-    <div class="bg-white shadow rounded-xl p-6 mt-6 mb-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">🎓 Kerusakan Fasilitas Pendidikan</h3>
-        <div class="grid grid-cols-6 gap-3">
-            <select name="id_jenis_kerusakan_pelayanandasar"
-        class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-        <option disabled selected>Pilih Jenis</option>
-        @foreach($jenisKerusakan as $jk)
-            <option value="{{ $jk->id_jenis_kerusakan_pelayanandasar }}">
-                {{ $jk->jenis_kerusakan_pelayanandasar }}
-            </option>
-        @endforeach
-    </select>
-            <input type="number" name="pelayanan_rr" placeholder="Rusak Ringan" class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-            <input type="number" name="pelayanan_rs" placeholder="Rusak Sedang" class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-            <input type="number" name="pelayanan_rb" placeholder="Rusak Berat" class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-            <input type="number" name="pelayanan_terendam" placeholder="Terendam" class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-            <input type="number" name="taksiran" placeholder="Taksiran (Rp)" class="border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg p-2">
-        </div>
-    </div>
-
-    {{-- === Pilih Pengawas Dinamis === --}}
-    <div class="mb-4">
-        <label class="block font-medium mb-2">Petugas Piket</label>
-
-        <div id="pengawas-container">
-            <div class="pengawas-item mb-2 flex gap-2">
-                
-    <select name="nip_pengawas" id="nip_pengawas" class="w-full border rounded px-3 py-2">
-        <option value="">-- Pilih Petugas Piket --</option>
-        @foreach($pengawas as $p)
-            <option value="{{ $p->nip_pengawas }}">{{ $p->nama_pengawas }} ({{ $p->jabatan }})</option>
-        @endforeach
-    </select>
-
-                <button type="button" class="hapus-btn bg-red-500 text-white px-3 py-2 rounded">Hapus</button>
-            </div>
-        </div>
-
-        <button type="button" id="tambah-pengawas"
-            class="mt-2 bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700">
-            + Tambah Petugas Piket
-        </button>
-    </div>
-
-    {{-- === SCRIPT DINAMIS === --}}
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const container = document.getElementById('pengawas-container');
-        const tambahBtn = document.getElementById('tambah-pengawas');
-
-        tambahBtn.addEventListener('click', function() {
-            const newItem = document.createElement('div');
-            newItem.classList.add('pengawas-item', 'mb-2', 'flex', 'gap-2');
-
-            newItem.innerHTML = `
-                <select name="nip_pengawas[]" class="w-full border rounded px-3 py-2">
-                    <option value="">-- Pilih Petugas Piket --</option>
-                    @foreach($pengawas as $p)
-                        <option value="{{ $p->nip_pengawas }}">{{ $p->nama_pengawas }} ({{ $p->nip_pengawas }})</option>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-2">
+                <select name="id_jenis_kerusakan_sosek" class="form-select" required>
+                    <option disabled selected>Pilih Jenis</option>
+                    @foreach($jenisKerusakan2 as $jk2)
+                        <option value="{{ $jk2->id_jenis_kerusakan_sosek }}">{{ $jk2->jenis_kerusakan_sosek }}</option>
                     @endforeach
                 </select>
-                <button type="button" class="hapus-btn bg-red-500 text-white px-3 py-2 rounded">Hapus</button>
-            `;
-            container.appendChild(newItem);
-        });
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="sosek[luas]" class="form-control" placeholder="Luas">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="sosek[rr]" class="form-control" placeholder="Rusak Ringan">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="sosek[rs]" class="form-control" placeholder="Rusak Sedang">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="sosek[rb]" class="form-control" placeholder="Rusak Berat">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="sosek[terendam]" class="form-control" placeholder="Terendam">
+            </div>
+        </div>
+    </div>
+</div>
 
-        // event delegation agar tombol hapus berfungsi untuk semua item
-        container.addEventListener('click', function(e) {
-            if (e.target.classList.contains('hapus-btn')) {
-                e.target.parentElement.remove();
-            }
-        });
+{{-- === Kerusakan Fasilitas Umum === --}}
+<div class="card shadow-sm border-0 rounded-3 mt-4">
+    <div class="card-header bg-light fw-semibold">
+        🏢 Kerusakan Fasilitas Umum
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <select name="id_jenis_kerusakan_sarpras" class="form-select" required>
+                    <option disabled selected>Pilih Jenis</option>
+                    @foreach($jenisKerusakan3 as $jk3)
+                        <option value="{{ $jk3->id_jenis_kerusakan_sarpras }}">{{ $jk3->jenis_kerusakan_sarpras }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="sarpras[rr]" class="form-control" placeholder="Rusak Ringan">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="sarpras[rs]" class="form-control" placeholder="Rusak Sedang">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="sarpras[rb]" class="form-control" placeholder="Rusak Berat">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="sarpras[terendam]" class="form-control" placeholder="Terendam">
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- === Kerusakan Fasilitas Pendidikan === --}}
+<div class="card shadow-sm border-0 rounded-3 mt-4 mb-4">
+    <div class="card-header bg-light fw-semibold">
+        🎓 Kerusakan Fasilitas Pendidikan
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-2">
+                <select name="id_jenis_kerusakan_pelayanandasar" class="form-select" required>
+                    <option disabled selected>Pilih Jenis</option>
+                    @foreach($jenisKerusakan as $jk)
+                        <option value="{{ $jk->id_jenis_kerusakan_pelayanandasar }}">{{ $jk->jenis_kerusakan_pelayanandasar }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="pelayanan_rr" class="form-control" placeholder="Rusak Ringan">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="pelayanan_rs" class="form-control" placeholder="Rusak Sedang">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="pelayanan_rb" class="form-control" placeholder="Rusak Berat">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="pelayanan_terendam" class="form-control" placeholder="Terendam">
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="taksiran" class="form-control" placeholder="Taksiran (Rp)">
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- === Petugas Piket === --}}
+<div class="card mt-3 shadow-sm">
+    <div class="card-header bg-light fw-semibold">
+        <i class="bi bi-person-badge"></i> Petugas Piket
+    </div>
+    <div class="card-body">
+        <label class="form-label">Daftar Petugas</label>
+
+        <div id="pengawas-container">
+            <div class="pengawas-item row g-2 mb-2 align-items-center">
+                <div class="col-md-10">
+                    <select name="nip_pengawas[]" class="form-select">
+                        <option value="">-- Pilih Petugas Piket --</option>
+                        @foreach($pengawas as $p)
+                            <option value="{{ $p->nip_pengawas }}">{{ $p->nama_pengawas }} ({{ $p->jabatan }})</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex justify-content-end">
+                    <button type="button" class="btn btn-outline-danger w-100 hapus-btn">
+                        <i class="bi bi-trash"></i> Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" id="tambah-pengawas" class="btn btn-outline-primary mt-2">
+            <i class="bi bi-person-plus"></i> Tambah Petugas Piket
+        </button>
+    </div>
+</div>
+
+{{-- === SCRIPT === --}}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('pengawas-container');
+    const tambahBtn = document.getElementById('tambah-pengawas');
+
+    tambahBtn.addEventListener('click', function() {
+        const newItem = document.createElement('div');
+        newItem.classList.add('pengawas-item', 'row', 'g-2', 'mb-2', 'align-items-center');
+
+        newItem.innerHTML = `
+            <div class="col-md-10">
+                <select name="nip_pengawas[]" class="form-select">
+                    <option value="">-- Pilih Petugas Piket --</option>
+                    @foreach($pengawas as $p)
+                        <option value="{{ $p->nip_pengawas }}">{{ $p->nama_pengawas }} ({{ $p->jabatan }})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2 d-flex justify-content-end">
+                <button type="button" class="btn btn-outline-danger w-100 hapus-btn">
+                    <i class="bi bi-trash"></i> Hapus
+                </button>
+            </div>
+        `;
+        container.appendChild(newItem);
     });
-    </script>
 
+    container.addEventListener('click', function(e) {
+        if (e.target.closest('.hapus-btn')) {
+            e.target.closest('.pengawas-item').remove();
+        }
+    });
+});
+</script>
 
-            {{-- Tombol --}}
-    <div class="flex justify-end gap-2">
-        <a href="{{ route('kejadian') }}" class="bg-gray-500 text-white px-4 py-2 rounded">Batal</a>
-        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
-        Simpan
+            {{-- Tombol Aksi --}}
+<div class="d-flex justify-content-end gap-2 mt-4">
+    <a href="{{ route('kejadian') }}" class="btn btn-secondary d-flex align-items-center gap-1">
+        <i class="bi bi-arrow-left-circle"></i> Batal
+    </a>
+    <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+        <i class="bi bi-save"></i> Simpan
     </button>
+</div>
+
 
     </div>
         </form>
@@ -597,5 +625,3 @@ document.addEventListener('DOMContentLoaded', function() {
     </script>
 
     @endsection
-
-

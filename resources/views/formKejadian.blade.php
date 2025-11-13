@@ -5,14 +5,70 @@
 @section('content')
 
 {{-- ====== PAGE HEADER ====== --}}
-<div class="card bg-primary text-white shadow mb-4">
-    <div class="card-body d-flex justify-content-between align-items-center">
-        <h1 class="h5 mb-0">Informasi Kejadian Kab Malang</h1>
-        {{-- <div class="d-none d-md-block">
-            <input type="text" class="form-control form-control-sm bg-light border-0" placeholder="Cari...">
-        </div> --}}
+{{-- ====== HEADER SELAMAT DATANG & PROFIL USER ====== --}}
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+    {{-- Bagian kiri: ucapan selamat datang --}}
+    <div>
+      <h2 class="mb-1">Kejadian</h2>
+      <div class="dash-sub text-muted">
+        {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('l, d F Y') }} —
+        <span id="clock">--:--:--</span>
+      </div>
     </div>
+
+    {{-- Bagian kanan: profil user --}}
+    <div class="dash-user d-flex align-items-center gap-2">
+      <img class="avatar rounded-circle border"
+           src="{{ $user->photo ? asset('storage/'.$user->photo) : asset('gambar/profile.png') }}"
+           alt="Foto {{ $user->nama ?? $user->name }}"
+           width="48" height="48">
+
+      <div>
+        <div class="fw-semibold">{{ $user->nama ?? $user->name }}</div>
+        <div class="small text-muted">{{ ucfirst(strtolower($user->role ?? 'User')) }}</div>
+      </div>
+
+      <div class="dropdown ms-2">
+        <button type="button" class="btn btn-cream btn-pill-sm" data-bs-toggle="dropdown" aria-label="Menu profil">
+          <i class="bi bi-three-dots-vertical"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-cream">
+          @if (Route::has('profile.edit'))
+            <li>
+              <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                <i class="bi bi-person me-2"></i> Edit Profil
+              </a>
+            </li>
+            <li><hr class="dropdown-divider my-1"></li>
+          @endif
+          <li>
+            <form action="{{ route('logout') }}" method="POST" class="m-0">@csrf
+              <button class="dropdown-item text-danger" type="submit">
+                <i class="bi bi-box-arrow-right me-2"></i> Logout
+              </button>
+            </form>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
 </div>
+<script>
+  // Jam Digital
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+</script>
+
 
 {{-- ====== CONTENT ====== --}}
 <div class="row g-4">

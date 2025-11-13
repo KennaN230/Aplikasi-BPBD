@@ -14,6 +14,7 @@ use App\Models\layan;
 use App\Models\sosekk;
 use App\Models\sarprass;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class KejadianController extends Controller
@@ -21,7 +22,8 @@ class KejadianController extends Controller
     public function index()
     {
         $kejadian = Kejadian::with(['namaKejadian', 'kecamatan'])->get();
-        return view('formKejadian', compact('kejadian'));
+        $user = Auth::user();
+        return view('formKejadian', compact('kejadian', 'user'));
     }
 
     public function create()
@@ -109,11 +111,19 @@ class KejadianController extends Controller
         'dokumentasi'      => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         'sebaran_dampak'   => 'required|string',
         'kib'              => 'required|string',
-        'nip_pengawas'     => 'required|string|exists:tb_pengawas,nip_pengawas',
+        'nip_pengawas'     => 'required|array',
+        'nip_pengawas.*'   => 'required|string',
     ]);
 
     $validated['kib'] = $kodeKIB;
-
+    
+    // Simpan relasi pengawas (1 atau banyak)
+    foreach ($validated['nip_pengawas'] as $nip) {
+        DB::table('tb_kejadian_pengawas')->insert([
+            'id_kejadian' => $kejadian->id_kejadian,
+            'nip_pengawas' => $nip,
+        ]);
+    }
     DB::transaction(function () use ($request, &$validated) {
 
         if ($request->hasFile('dokumentasi')) {
@@ -199,23 +209,30 @@ DB::table('tb_kerusakan_sarpras')->insert([
      *  EDIT KEJADIAN
      *  =============================== */
     public function edit($id_kejadian)
-    {
-        $kejadian = Kejadian::with(['korban', 'rumah', 'sosek', 'sarpras', 'pelayanan'])->findOrFail($id_kejadian);
+{
+    $kejadian = Kejadian::with(['korban', 'rumah', 'sosek', 'sarpras', 'pelayanan'])->findOrFail($id_kejadian);
 
-        return view('edit', [
-            'kejadian'       => $kejadian,
-            'jenisBencana'   => JenisBencana::all(),
-            'namaKejadian'   => \App\Models\NamaKejadian::all(),
-            'kategoriKorban' => KategoriKorban::all(),
-            'kategoriUmur'   => KategoriUmur::all(),
-            'statusDarurat'  => \App\Models\StatusDarurat::all(),
-            'pengawas'       => \App\Models\Pengawas::all(),
-            'kecamatan'      => Kecamatan::all(),
-            'sosek'          => $kejadian->sosek()->first(),
-            'sarpras'        => $kejadian->sarpras()->first(),
-            'pelayanan'      => $kejadian->pelayanan()->first(),
-        ]);
-    }
+    $jenisKerusakan = layan::all();
+    $jenisKerusakan2 = sosekk::all();      // <= tambahkan ini
+    $jenisKerusakan3 = sarprass::all();
+
+    return view('edit', [
+        'kejadian'       => $kejadian,
+        'jenisBencana'   => JenisBencana::all(),
+        'namaKejadian'   => \App\Models\NamaKejadian::all(),
+        'kategoriKorban' => KategoriKorban::all(),
+        'kategoriUmur'   => KategoriUmur::all(),
+        'statusDarurat'  => \App\Models\StatusDarurat::all(),
+        'pengawas'       => \App\Models\Pengawas::all(),
+        'kecamatan'      => Kecamatan::all(),
+        'sosek'          => $kejadian->sosek()->first(),
+        'sarpras'        => $kejadian->sarpras()->first(),
+        'pelayanan'      => $kejadian->pelayanan()->first(),
+        'jenisKerusakan'  => $jenisKerusakan,
+        'jenisKerusakan2' => $jenisKerusakan2, // <= kirim ke view
+        'jenisKerusakan3' => $jenisKerusakan3,
+    ]);
+}
 
     /** ===============================
      *  UPDATE KEJADIAN

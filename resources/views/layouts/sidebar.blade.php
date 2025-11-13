@@ -14,34 +14,81 @@
   {{-- Menu --}}
   <ul class="menu">
     <li>
-      <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'is-active' : '' }}">
+      <a href="{{ route('dashboard') }}" 
+         class="{{ request()->routeIs('dashboard') ? 'is-active' : '' }}">
         <i class="bi bi-house-door"></i>
         <span>Beranda</span>
       </a>
     </li>
+
     <li>
-      <a href="#">
+      <a href="{{ route('kejadian') }}" 
+         class="{{ request()->routeIs('kejadian*') ? 'is-active' : '' }}">
         <i class="bi bi-exclamation-triangle"></i>
         <span>Kejadian</span>
       </a>
     </li>
+
     <li>
-      <a href="#"><i class="bi bi-activity"></i><span>Gempa Bumi</span></a>
+      <a href="{{ url('/gempa') }}" 
+         class="{{ request()->is('gempa*') ? 'is-active' : '' }}">
+        <i class="bi bi-activity"></i>
+        <span>Gempa Bumi</span>
+      </a>
     </li>
-<li>
-  <a href="{{ route('aktivitas-gunung.index') }}"class="{{ request()->routeIs('aktivitas-gunung.*') ? 'is-active' : '' }}"><i class="bi bi-triangle-fill me-2"></i><span>Aktivitas Gunung Aktif</span></a>
-</li>
+
     <li>
-      <a href="{{ route('rain.index') }}" class="{{ request()->routeIs('Rain') ? 'is-active' : '' }}"><i class="bi bi-cloud-rain-heavy"></i><span>Hari Hujan & Tanpa Hujan</span></a>
+      <a href="{{ route('aktivitas-gunung.index') }}" 
+         class="{{ request()->routeIs('aktivitas-gunung.*') ? 'is-active' : '' }}">
+        <i class="bi bi-triangle-fill me-2"></i>
+        <span>Aktivitas Gunung Aktif</span>
+      </a>
     </li>
+
     <li>
-      <a href="#"><i class="bi bi-tsunami"></i><span>Tinggi Gelombang</span></a>
+      <a href="{{ route('rain.index') }}" 
+         class="{{ request()->routeIs('rain.*') ? 'is-active' : '' }}">
+        <i class="bi bi-cloud-rain-heavy"></i>
+        <span>Hari Hujan & Tanpa Hujan</span>
+      </a>
     </li>
+
     <li>
-      <a href="#"><i class="bi bi-building"></i><span>DESTANA Kab.Malang</span></a>
+      <a href="{{ url('/gelombang') }}" 
+         class="{{ request()->is('gelombang*') ? 'is-active' : '' }}">
+        <i class="bi bi-tsunami"></i>
+        <span>Tinggi Gelombang</span>
+      </a>
     </li>
+
     <li>
-      <a href="#"><i class="bi bi-shield"></i><span>SPAB Kab.Malang</span></a>
+      <a href="{{ url('/titikpanas') }}" 
+         class="{{ request()->is('titikpanas*') ? 'is-active' : '' }}">
+        <i class="bi bi-thermometer-half"></i>
+        <span>Titik Panas</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="{{ url('/petugas') }}" 
+         class="{{ request()->is('petugas*') ? 'is-active' : '' }}">
+        <i class="bi bi-people"></i>
+        <span>Petugas</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="#" class="{{ request()->is('destana*') ? 'is-active' : '' }}">
+        <i class="bi bi-building"></i>
+        <span>DESTANA Kab.Malang</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="#" class="{{ request()->is('spab*') ? 'is-active' : '' }}">
+        <i class="bi bi-shield"></i>
+        <span>SPAB Kab.Malang</span>
+      </a>
     </li>
   </ul>
 </div>

@@ -218,20 +218,55 @@ class AuthController extends Controller
     $end   = $to   ? Carbon::parse($to.' 07:00:00')->addDay()->subSecond()
                    : (clone $start)->addDay()->subSecond();
 
-    // === KEJADIAN: gabung kolom DATE (tanggal) + TIME (waktu)
+    // ==== ambil lat & lon dari query atau gunakan default (Kabupaten Malang)
+    $lat = $r->query('lat', -8.1463);   // default Malang
+    $lon = $r->query('lon', 112.6084);
+
+    // ==== ambil data cuaca dari Open-Meteo API ====
+    try {
+        $url = "https://api.open-meteo.com/v1/forecast?latitude={$lat}&longitude={$lon}&current=temperature_2m,precipitation,weather_code,wind_speed_10m,wind_direction_10m&timezone=Asia%2FJakarta";
+        $response = file_get_contents($url);
+        $weatherData = json_decode($response, true);
+
+        $current = $weatherData['current'] ?? [];
+        $temperature = $current['temperature_2m'] ?? null;
+        $precip = $current['precipitation'] ?? null;
+        $windSpeed = $current['wind_speed_10m'] ?? null;
+        $windDir = $current['wind_direction_10m'] ?? null;
+
+        // terjemahkan weather_code jadi teks singkat
+        $code = $current['weather_code'] ?? 0;
+        $cuacaText = match(true) {
+            $code >= 0 && $code <= 3   => 'Cerah – Berawan',
+            $code >= 45 && $code <= 48 => 'Berkabut',
+            $code >= 51 && $code <= 67 => 'Hujan Ringan',
+            $code >= 71 && $code <= 77 => 'Hujan Salju Ringan',
+            $code >= 80 && $code <= 82 => 'Hujan Lebat',
+            $code >= 95               => 'Badai / Petir',
+            default                   => 'Cerah Berawan',
+        };
+    } catch (\Exception $e) {
+        // fallback jika API gagal
+        $cuacaText = 'Hujan Ringan – Hujan Deras';
+        $temperature = '28';
+        $precip = null;
+        $windSpeed = '15';
+        $windDir = 'Barat Daya';
+    }
+
+    // === KEJADIAN
     $kejadian = Kejadian::query()
         ->whereBetween(DB::raw("TIMESTAMP(`tanggal`,`waktu`)"), [$start, $end])
-        ->with(['namaKejadian','kecamatan']) // kalau ada
+        ->with(['namaKejadian','kecamatan'])
         ->orderBy('tanggal')->orderBy('waktu')
         ->get();
 
-    // === AKTIVITAS GUNUNG: kolom 'tanggal' (DATE)
+    // === AKTIVITAS GUNUNG
     $gunungRows = AktivitasGunung::query()
         ->whereBetween('tanggal', [$start->toDateString(), $end->toDateString()])
         ->orderBy('tanggal')
         ->get();
 
-    // mapping ke struktur yang Blade lama harapkan (nama, tanggal, aktivitas, dst.)
     $gunung = $gunungRows->map(function ($it) {
         return [
             'nama'        => $it->gunung,
@@ -244,13 +279,13 @@ class AuthController extends Controller
         ];
     });
 
-    // === CURAH HUJAN: kolom 'hari_tanggal' (DATE)
+    // === CURAH HUJAN
     $curah_hujan = Rain::query()
         ->whereBetween('hari_tanggal', [$start->toDateString(), $end->toDateString()])
         ->orderBy('hari_tanggal','asc')
         ->get();
 
-    // === Data statis yang sudah ada (tetap)
+    // === Data statis (tetap)
     $kop = [
         'instansi1' => 'PEMERINTAH KABUPATEN MALANG',
         'instansi2' => 'BADAN PENANGGULANGAN BENCANA DAERAH',
@@ -282,31 +317,36 @@ class AuthController extends Controller
         ],
     ];
 
-    // contoh data lain (tetap seperti punyamu / bisa diisi dari DB jika ada)
+    $prakiraan_cuaca = [
+        'rentang'     => $start->locale('id')->translatedFormat('l, d F Y').' – '.$end->locale('id')->translatedFormat('l, d F Y').' (07.00 – 07.00 WIB)',
+        'cuaca'       => $cuacaText,
+        'suhu'        => $temperature ? "{$temperature}°C" : '23 – 32°C',
+        'kelembaban'  => $precip ? "{$precip} mm" : '75 – 95%',
+        'kecepatan'   => $windSpeed ? "{$windSpeed} km/jam" : '30 km/jam',
+        'arah'        => $windDir ?? 'Barat Daya – Barat Laut',
+    ];
+
+    // (data lain tetap sama)
     $hotspot = [
         'pukul1' => '16.00 WIB',
         'data1'  => [['kecamatan' => 'NIHIL', 'jumlah' => 'NIHIL']],
         'pukul2' => '05.00 WIB',
         'data2'  => [['kecamatan' => 'NIHIL', 'jumlah' => 'NIHIL']],
     ];
+
     $peringatan_dini = [
         'radio'   => 'VHF 169.525 MHz via Repeater BPBD Kab. Malang dan frekuensi komunitas di wilayah kabupaten.',
         'jejaring'=> 'Jejaring sosial & ponsel monitoring 082244094886.',
     ];
-    $prakiraan_cuaca = [
-        'rentang'     => $start->locale('id')->translatedFormat('l, d F Y').' – '.$end->locale('id')->translatedFormat('l, d F Y').' (07.00 – 07.00 WIB)',
-        'cuaca'       => 'Hujan Ringan – Hujan Deras',
-        'suhu'        => '23 – 32°C',
-        'kelembaban'  => '75 – 95%',
-        'kecepatan'   => '30 km/jam',
-        'arah'        => 'Barat Daya – Barat Laut',
-    ];
+
     $gelombang = [[ 'arah'=>'Barat Daya – Barat Laut','kts'=>'16','cuaca'=>'Hujan Ringan – Hujan Deras','sig'=>'0,1','max'=>'0,3' ]];
+
     $radio = [
         ['kecamatan'=>'Donomulyo','pantauan'=>'Hujan Ringan – Hujan Deras'],
         ['kecamatan'=>'Pagak','pantauan'=>'Hujan Ringan – Hujan Deras'],
         ['kecamatan'=>'Bantur','pantauan'=>'Hujan Ringan – Hujan Deras'],
     ];
+
     $ttd = [
         'manager' => [
             'jabatan' => "Manajer Pusdalops PB\nBPBD Kabupaten Malang",
@@ -321,10 +361,9 @@ class AuthController extends Controller
         'tanggal_bawah' => 'Malang, '.$end->locale('id')->translatedFormat('d F Y'),
     ];
 
-    return view('laporan-harian', compact(
+    return view('users.laporan-harian', compact(
         'kop','surat','hotspot','peringatan_dini','prakiraan_cuaca','gelombang','radio','ttd',
-        'start','end',
-        'kejadian','gunung','curah_hujan'
+        'start','end','kejadian','gunung','curah_hujan'
     ));
 }
 

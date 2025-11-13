@@ -13,7 +13,12 @@ use App\Http\Controllers\{
     RainController,
     AktivitasGunungController,
     KaryawanController,
-    DesaController
+    DesaController,
+    GelombangController,
+    TitikpanasController,
+    GempaController,
+    PenggunaController,
+    BMKGController
 };
 
 /*
@@ -21,8 +26,10 @@ use App\Http\Controllers\{
 | Halaman Utama
 |--------------------------------------------------------------------------
 */
-Route::view('/', 'welcome')->name('home');
+Route::view('/1', 'welcome')->name('home');
 Route::view('/admin', 'Admin')->name('admin.home');
+Route::get('/user', [PenggunaController::class, 'index'])->name('user');
+Route::get('/cuaca', [BMKGController::class, 'index'])->name('cuaca');
 
 /*
 |--------------------------------------------------------------------------
@@ -80,27 +87,31 @@ Route::middleware(['auth', 'role:Admin'])->group(function () {
         ->except(['show']);
 
     Route::post('/users/{id}/approve', [UserController::class, 'approve'])->name('users.approve');
-    Route::post('/users/{id}/reject',  [UserController::class, 'reject'])->name('users.reject');
+    Route::post('/users/{id}/reject', [UserController::class, 'reject'])->name('users.reject');
 });
+
 
 /*
 |--------------------------------------------------------------------------
 | MODUL KEJADIAN
 |--------------------------------------------------------------------------
 */
-Route::controller(KejadianController::class)->group(function () {
-    Route::get('/kejadian', 'index')->name('kejadian');
-    Route::get('/kejadian/create', 'create')->name('kejadian.create');
-    Route::post('/kejadian', 'store')->name('kejadian.store');
-    Route::get('/kejadian/{id_kejadian}/edit', 'edit')->name('kejadian.edit');
-    Route::put('/kejadian/{id_kejadian}', 'update')->name('kejadian.update');
-    Route::delete('/kejadian/{id_kejadian}', 'destroy')->name('kejadian.destroy');
-    Route::get('/kejadian/{id_kejadian}/print', 'print')->name('kejadian.print');
-    Route::get('/kejadian/filter', 'filter')->name('kejadian.filter');
-    Route::get('/kejadian/{id_kejadian}', 'show')->name('kejadian.show');
-    Route::get('/kejadian/print', 'printByTanggal')->name('kejadian.printByTanggal');
+Route::middleware(['auth'])->group(function () {
+
+    Route::controller(KejadianController::class)->group(function () {
+        Route::get('/kejadian', 'index')->name('kejadian');
+        Route::get('/kejadian/create', 'create')->name('kejadian.create');
+        Route::post('/kejadian', 'store')->name('kejadian.store');
+        Route::get('/kejadian/{id_kejadian}/edit', 'edit')->name('kejadian.edit');
+        Route::put('/kejadian/{id_kejadian}', 'update')->name('kejadian.update');
+        Route::delete('/kejadian/{id_kejadian}', 'destroy')->name('kejadian.destroy');
+        Route::get('/kejadian/{id_kejadian}/print', 'print')->name('kejadian.print');
+        Route::get('/kejadian/filter', 'filter')->name('kejadian.filter');
+        Route::get('/kejadian/{id_kejadian}', 'show')->name('kejadian.show');
+        Route::get('/kejadian/print', 'printByTanggal')->name('kejadian.printByTanggal');
+        Route::get('/get-tb_desa/{id_kecamatan}', [DesaController::class, 'getDesa'])->name('desa.get');
+    });
 });
-Route::get('/get-tb_desa/{id_kecamatan}', [DesaController::class, 'getDesa'])->name('desa.get');
 
 /*
 |--------------------------------------------------------------------------
@@ -118,18 +129,20 @@ Route::controller(KaryawanController::class)->group(function () {
 | MODUL CURAH HUJAN (RAIN)
 |--------------------------------------------------------------------------
 */
-Route::controller(RainController::class)->group(function () {
-    Route::get('/hujan', 'index')->name('rain.index');
-    Route::get('/hujan/tambah', 'create')->name('rain.create');
-    Route::post('/hujan/store', 'store')->name('rain.store');
-    Route::get('/rain/{id}/edit', 'edit')->name('rain.edit');
-    Route::put('/rain/{id}', 'update')->name('rain.update');
-    Route::put('/hujan/update/{rain}', 'update')->name('rain.update');
-    Route::delete('/hujan/delete/{rain}', 'destroy')->name('rain.destroy');
+Route::middleware(['auth'])->group(function () {
 
-    // Cetak PDF
-    Route::get('/rain/cetakpdf', 'cetakpdf')->name('rain.cetakpdf');
-    Route::get('/rainpdfgrafik', 'cetakPdfGrafik')->name('rainpdfgrafik');
+    Route::controller(RainController::class)->group(function () {
+        Route::get('/hujan', 'index')->name('rain.index');
+        Route::get('/rain', [RainController::class, 'index'])->name('rain.index');
+        Route::get('/hujan/tambah', 'create')->name('rain.create');
+        Route::post('/hujan', 'store')->name('rain.store');
+        Route::get('/hujan/{rain}/edit', 'edit')->name('rain.edit');
+        Route::put('/hujan/{rain}', 'update')->name('rain.update');
+        Route::delete('/hujan/{rain}', 'destroy')->name('rain.destroy');
+
+        // Cetak PDF
+        Route::get('/hujan/cetak/grafik', 'cetakPdfGrafik')->name('rainpdfgrafik');
+    });
 });
 
 /*
@@ -137,7 +150,7 @@ Route::controller(RainController::class)->group(function () {
 | MODUL LANDING PAGE + API PETA
 |--------------------------------------------------------------------------
 */
-Route::get('/landing', [LandingController::class, 'index'])->name('landing');
+Route::get('/', [LandingController::class, 'index'])->name('landing');
 
 // API kejadian di peta
 Route::get('/kejadian/daerah/{kecamatan}', [LandingController::class, 'listKejadianDaerah']);
@@ -155,5 +168,39 @@ Route::get('/aktivitas-gunung/export', [AktivitasGunungController::class, 'expor
 // Hindari bentrok antara "export" dan "show"
 Route::resource('aktivitas-gunung', AktivitasGunungController::class)->except(['show']);
 
+/*
+|--------------------------------------------------------------------------
+| MODUL GELOMBANG
+|--------------------------------------------------------------------------
+*/
+Route::get('/gelombang/pdf', [GelombangController::class, 'cetakPdf'])->name('gelombang.cetakpdf');
+Route::get('/gelombang/pdfgrafik', [GelombangController::class, 'pdfgrafik'])->name('gelombang.pdfgrafik');
 
+Route::resource('gelombang', GelombangController::class);
+
+/*
+|--------------------------------------------------------------------------
+| MODUL GEMPA
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+    Route::get('/gempa', [GempaController::class, 'index'])->name('gempa.index');
+    Route::get('/gempa/create', [GempaController::class, 'create'])->name('gempa.create');
+    Route::post('/gempa/store', [GempaController::class, 'store'])->name('gempa.store');
+    Route::get('/gempa/{id}/edit', [GempaController::class, 'edit'])->name('gempa.edit');
+    Route::put('/gempa/{id}', [GempaController::class, 'update'])->name('gempa.update');
+    Route::delete('/gempa/{id}', [GempaController::class, 'destroy'])->name('gempa.destroy');
+    Route::get('/gempa/{id}', [GempaController::class, 'show'])->name('gempa.show');
+    Route::get('/gempa/cetak/pdf', [GempaController::class, 'cetakPdf'])->name('gempa.cetak.pdf');
+});
+
+/*
+|--------------------------------------------------------------------------
+| MODUL TITIK PANAS
+|--------------------------------------------------------------------------
+*/
+Route::get('/titikpanas', [TitikpanasController::class, 'index'])->name('titikpanas.index');
+Route::post('/titikpanas/store', [TitikpanasController::class, 'store'])->name('titikpanas.store');
+Route::get('/titikpanas/cetak/pdf', [TitikpanasController::class, 'cetakPdf'])->name('titikpanas.cetak.pdf');
+Route::delete('/titikpanas/{titikpanas}', [TitikpanasController::class, 'destroy'])->name('titikpanas.destroy');
 Route::get('/kejadian/get-index', [KejadianController::class, 'getIndex'])->name('kejadian.getIndex');
