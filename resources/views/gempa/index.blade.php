@@ -155,6 +155,53 @@
   const dataGempa = @json($gempa);
   let srChartInstance, bulanChartInstance;
 
+  // === FILTER BERDASARKAN TANGGAL ===
+function applyFilters() {
+    const bulan  = document.getElementById('bulanFilter').value;
+    const tahun  = document.getElementById('tahunFilter').value;
+    const start  = document.getElementById('startDate').value;
+    const end    = document.getElementById('endDate').value;
+
+    let filtered = dataGempa;
+
+    // === FILTER BERDASARKAN BULAN ===
+    if (bulan) {
+        filtered = filtered.filter(g => {
+            const t = new Date(g.tanggal);
+            return (t.getMonth() + 1) == bulan;
+        });
+    }
+
+    // === FILTER BERDASARKAN TAHUN ===
+    if (tahun) {
+        filtered = filtered.filter(g => {
+            const t = new Date(g.tanggal);
+            return t.getFullYear() == tahun;
+        });
+    }
+
+    // === FILTER RANGE TANGGAL ===
+    if (start) {
+        filtered = filtered.filter(g => new Date(g.tanggal) >= new Date(start));
+    }
+    if (end) {
+        filtered = filtered.filter(g => new Date(g.tanggal) <= new Date(end));
+    }
+
+    // Render ulang tabel & chart
+    renderTable(filtered);
+    renderCharts(filtered);
+
+    // Update link PDF
+    updatePdfLink();
+}
+
+// Event Listener
+document.getElementById('bulanFilter').addEventListener('change', applyFilters);
+document.getElementById('tahunFilter').addEventListener('change', applyFilters);
+document.getElementById('startDate').addEventListener('change', applyFilters);
+document.getElementById('endDate').addEventListener('change', applyFilters);
+
   function renderTable(data){
     const tbody=document.querySelector("table tbody");
     tbody.innerHTML="";
@@ -232,4 +279,4 @@
   renderTable(dataGempa);
   renderCharts(dataGempa);
 </script>
-@endpush
+@endpush  

@@ -6,6 +6,7 @@ use App\Models\TitikPanas;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use App\Models\TemplateTTD;
 
 class TitikpanasController extends Controller
 {
@@ -72,8 +73,14 @@ class TitikpanasController extends Controller
 
     public function update(Request $request, TitikPanas $titikpanas)
     {
+        if ($request->waktu) {
+    $request->merge([
+        'waktu' => substr($request->waktu, 0, 5)
+    ]);
+}
+
         $data = $request->validate([
-            'tanggal'     => ['required','date'],
+            'waktu' => ['nullable','sometimes','date_format:H:i'],
             'titik_panas' => ['required','integer','min:0'],
             'latitude'    => ['required','string','max:50'],
             'longitude'   => ['required','string','max:50'],
@@ -99,55 +106,82 @@ class TitikpanasController extends Controller
     }
 
     public function cetakPdf(Request $request)
-    {
-        // Filter sama seperti index()
-        $q      = trim((string) $request->query('q', ''));
-        $bulan  = $request->integer('bulan');
-        $tahun  = $request->integer('tahun');
-        $from   = $request->query('from') ?? $request->query('tgl_mulai');
-        $to     = $request->query('to')   ?? $request->query('tgl_selesai');
+{
+    // Filter sama seperti index()
+    $q      = trim((string) $request->query('q', ''));
+    $bulan  = $request->integer('bulan');
+    $tahun  = $request->integer('tahun');
+    $from   = $request->query('from') ?? $request->query('tgl_mulai');
+    $to     = $request->query('to')   ?? $request->query('tgl_selesai');
 
-        $query = TitikPanas::query();
+    $query = TitikPanas::query();
 
-        if ($q !== '') {
-            $query->where(function ($w) use ($q) {
-                $w->where('kecamatan', 'like', "%{$q}%")
-                  ->orWhere('keterangan', 'like', "%{$q}%")
-                  ->orWhere('satelit', 'like', "%{$q}%");
-            });
-        }
-        if ($bulan) { $query->whereMonth('tanggal', $bulan); }
-        if ($tahun) { $query->whereYear('tanggal', $tahun); }
-
-        $startDate = null; $endDate = null;
-
-        if ($from && $to) {
-            $query->whereBetween('tanggal', [$from, $to]);
-            $startDate = Carbon::parse($from)->translatedFormat('d F Y');
-            $endDate   = Carbon::parse($to)->translatedFormat('d F Y');
-        } elseif ($bulan && $tahun) {
-            $startDate = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('d F Y');
-            $endDate   = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth()->translatedFormat('d F Y');
-        } elseif ($tahun) {
-            $startDate = 'Tahun '.$tahun;
-        } else {
-            $startDate = Carbon::now()->translatedFormat('d F Y');
-        }
-
-        $items    = $query->orderBy('tanggal', 'desc')->get();
-        $kejadian = $items; // kompatibel dengan view lama
-
-        // Logo opsional
-        $path1 = public_path('gambar/logo1.png');
-        $path2 = public_path('gambar/logo2.png');
-        $logo1 = file_exists($path1) ? base64_encode(file_get_contents($path1)) : null;
-        $logo2 = file_exists($path2) ? base64_encode(file_get_contents($path2)) : null;
-
-        $tanggal = $startDate . ($endDate ? ' s/d ' . $endDate : '');
-
-        $pdf = Pdf::loadView('titikpanas.pdf', compact('items','kejadian','startDate','endDate','logo1','logo2','tanggal'))
-                  ->setPaper('a4', 'portrait');
-
-        return $pdf->stream('laporan-titikpanas.pdf');
+    if ($q !== '') {
+        $query->where(function ($w) use ($q) {
+            $w->where('kecamatan', 'like', "%{$q}%")
+              ->orWhere('keterangan', 'like', "%{$q}%")
+              ->orWhere('satelit', 'like', "%{$q}%");
+        });
     }
+    if ($bulan) { $query->whereMonth('tanggal', $bulan); }
+    if ($tahun) { $query->whereYear('tanggal', $tahun); }
+
+    $startDate = null; $endDate = null;
+
+    if ($from && $to) {
+        $query->whereBetween('tanggal', [$from, $to]);
+        $startDate = Carbon::parse($from)->translatedFormat('d F Y');
+        $endDate   = Carbon::parse($to)->translatedFormat('d F Y');
+    } elseif ($bulan && $tahun) {
+        $startDate = Carbon::createFromDate($tahun, $bulan, 1)->translatedFormat('d F Y');
+        $endDate   = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth()->translatedFormat('d F Y');
+    } elseif ($tahun) {
+        $startDate = 'Tahun '.$tahun;
+    } else {
+        $startDate = Carbon::now()->translatedFormat('d F Y');
+    }
+
+    $items    = $query->orderBy('tanggal', 'desc')->get();
+    $kejadian = $items; // kompatibel dengan view lama
+
+    // Logo opsional
+    $path1 = public_path('gambar/logo1.png');
+    $path2 = public_path('gambar/logo2.png');
+    $logo1 = file_exists($path1) ? base64_encode(file_get_contents($path1)) : null;
+    $logo2 = file_exists($path2) ? base64_encode(file_get_contents($path2)) : null;
+
+    $tanggal = $startDate . ($endDate ? ' s/d ' . $endDate : '');
+    $tglTtd = Carbon::now()->translatedFormat('d F Y');
+
+    // ==========================
+    // AMBIL DATA TTD DARI DATABASE
+    // ==========================
+    
+     // Ambil semua data TTD aktif (hanya kolom yang dibutuhkan)
+$ttdList = TemplateTTD::where('is_active', 1)
+    ->select('nama_pengawas', 'nip_pengawas', 'jabatan') // hanya ambil 3 kolom ini
+    ->orderBy('id', 'asc')
+    ->get();
+
+// Atau ambil yang pertama saja jika hanya butuh satu orang
+$ttdPertama = TemplateTTD::where('is_active', 1)
+    ->select('nama_pengawas', 'nip_pengawas', 'jabatan')
+    ->orderBy('id', 'desc')
+    ->first();
+
+    $pdf = Pdf::loadView('titikpanas.pdf', compact(
+        'items',
+        'kejadian',
+        'startDate',
+        'endDate',
+        'logo1',
+        'logo2',
+        'tanggal',
+        'tglTtd',
+        'ttdList',
+        'ttdPertama'
+    ))->setPaper('a4', 'portrait');
+
+    return $pdf->stream('laporan-titikpanas.pdf');
+}
 }

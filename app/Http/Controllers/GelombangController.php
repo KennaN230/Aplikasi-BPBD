@@ -7,6 +7,9 @@ use App\Models\Gelombang;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf as DompdfPdf;
 use Carbon\Carbon;
+use App\Models\TemplateTTD;
+use App\Models\Karyawan;
+use App\Http\Controllers\KaryawanController;
 
 class GelombangController extends Controller
 {
@@ -49,8 +52,12 @@ class GelombangController extends Controller
     }
 
     // Form tambah data
-    public function create() { return view('gelombang.create'); }
+    public function create()
+{
+    $user = auth()->user(); // Ambil user login
 
+    return view('gelombang.create', compact('user'));
+}
     // Simpan data baru
     public function store(Request $request)
     {
@@ -144,20 +151,20 @@ public function cetakPdf(Request $request)
     $query = $this->filterQuery($request);
     $data = $query->orderBy('tanggal', 'asc')->get();
 
+    $template = TemplateTTD::first(); // ambil template TTD
     $logos = $this->getLogos();
     $tanggal = $this->getLabelTanggal($request);
 
     $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('gelombang.gelombangpdf', array_merge($logos, [
         'gelombang' => $data,
         'periode'   => $tanggal,
+        'template'  => $template,
     ]))->setPaper('a4', 'portrait');
 
-    // Jika query string ?download=1 dikirim, maka langsung download
     if ($request->query('download') == 1) {
         return $pdf->download('laporan_gelombang.pdf');
     }
 
-    // Default: preview di browser
     return $pdf->stream('laporan_gelombang.pdf');
 }
 
@@ -193,13 +200,37 @@ public function cetakPdf(Request $request)
         $periode = 'Semua Periode';
     }
 
-    // Logo base64 (pastikan path benar)
+    // Logo base64
     $logo1Path = public_path('gambar/logo1.png');
     $logo2Path = public_path('gambar/logo2.png');
     $logo1 = file_exists($logo1Path) ? base64_encode(file_get_contents($logo1Path)) : null;
     $logo2 = file_exists($logo2Path) ? base64_encode(file_get_contents($logo2Path)) : null;
 
-    // Render view HTML dengan Chart.js
-    return view('gelombang.pdfgrafik', compact('grafik', 'rataBulan', 'periode', 'logo1', 'logo2'));
+    // ==========================
+    // AMBIL TEMPLATE TTD
+    // ==========================
+    // Option 1: Ambil template aktif berdasarkan jenis
+    $templateTTD = TemplateTTD::where('is_active', 1)
+        ->where('jenis_template', 'laporan') // sesuaikan dengan jenis
+        ->first();
+
+    // Option 2: Ambil template untuk Kepala BPBD (jika ada field jabatan)
+    $ttdKepala = TemplateTTD::where('is_active', 1)
+        ->where('jabatan', 'like', '%Kepala BPBD%')
+        ->first();
+
+    // Option 3: Ambil semua template aktif
+    $templatesTTD = TemplateTTD::where('is_active', 1)->get();
+
+    return view('gelombang.pdfgrafik', compact(
+        'grafik', 
+        'rataBulan', 
+        'periode', 
+        'logo1', 
+        'logo2',
+        'templateTTD',
+        'ttdKepala',
+        'templatesTTD'
+    ));
 }
 }

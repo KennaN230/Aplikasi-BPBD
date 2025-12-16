@@ -419,7 +419,20 @@ document.addEventListener('DOMContentLoaded', () => {
       <tr><td>Kecamatan</td><td>${LOK.kecamatan || '-'}</td></tr>
       <tr><td>Kabupaten</td><td>${LOK.kabupaten || 'Malang'}</td></tr>
       <tr><td>Provinsi</td><td>${LOK.provinsi || 'Jawa Timur'}</td></tr>
-      <tr><td>Foto</td><td>${LOK.foto_url ? `<a href="${LOK.foto_url}" target="_blank" rel="noopener">Lihat Foto</a>` : '-'}</td></tr>
+<tr>
+  <td>Dokumentasi</td>
+  <td>
+    ${
+      LOK.dokumentasi && Array.isArray(LOK.dokumentasi) && LOK.dokumentasi.length > 0
+        ? LOK.dokumentasi.map(f => 
+            `<a href="/storage/${f}" target="_blank">Lihat File</a>`
+          ).join('<br>')
+        : `<a href="https://drive.google.com/file/d/1IqA6DummyID/view?usp=sharing" target="_blank">
+             Dokumentasi Belum Ada (Klik untuk contoh)
+           </a>`
+    }
+  </td>
+</tr>
       <tr><td>Tanggal Kejadian</td><td>${LOK.tanggal || '-'}</td></tr>
     `;
     const K = data?.korban || {};

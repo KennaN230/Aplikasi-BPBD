@@ -2,8 +2,8 @@
   {{-- Brand --}}
   <div class="brand">
     <div class="d-flex align-items-center gap-1">
-      <img src="{{ asset('gambar/logoBPBD.png') }}" width="30" height="30" alt="logo">
       <img src="{{ asset('gambar/Logo_Kabupaten_Malang 1.png') }}" width="30" height="30" alt="logo">
+      <img src="{{ asset('gambar/logoBPBD.png') }}" width="30" height="30" alt="logo">
       <div>
         <h6 class="mb-1">Informasi Kejadian Kab Malang</h6>
       </div>
@@ -73,7 +73,7 @@
       <a href="{{ url('/petugas') }}" 
          class="{{ request()->is('petugas*') ? 'is-active' : '' }}">
         <i class="bi bi-people"></i>
-        <span>Petugas</span>
+        <span>Menu Master</span>
       </a>
     </li>
 

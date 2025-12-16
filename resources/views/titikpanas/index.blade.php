@@ -1,9 +1,11 @@
 {{-- resources/views/titikpanas/index.blade.php --}}
 @extends('layouts.app')
 @section('title','Titik Panas')
-
+  
 @push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
+
   main.app-main{ padding-top:6px !important; }
 
   .flex-1{flex:1 1 auto}
@@ -41,6 +43,9 @@
   .col-tgl{width:110px}
   .col-aksi{width:210px}
 </style>
+@endpush
+@push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 @endpush
 
 @section('content')
@@ -187,9 +192,6 @@
 </form>
 
 {{-- FLASH --}}
-@if(session('ok'))
-  <div class="alert alert-success">{{ session('ok') }}</div>
-@endif
 @if($errors->any())
   <div class="alert alert-danger"><ul class="mb-0">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
 @endif
@@ -304,8 +306,86 @@
           <div class="col-md-4"><label class="form-label">Tanggal</label><input type="date" name="tanggal" class="form-control" required></div>
           <div class="col-md-4"><label class="form-label">Titik Panas</label><input type="number" name="titik_panas" class="form-control" min="0" required></div>
           <div class="col-md-4"><label class="form-label">Waktu</label><input type="time" name="waktu" class="form-control"></div>
-          <div class="col-md-6"><label class="form-label">Latitude</label><input name="latitude" class="form-control" required></div>
-          <div class="col-md-6"><label class="form-label">Longitude</label><input name="longitude" class="form-control" required></div>
+          {{-- Peta Lokasi --}}
+                <div class="mb-3">
+    <label class="form-label fw-semibold">Pilih Lokasi di Peta</label>
+    <div id="mapCreate" style="height: 350px; border-radius: 10px;" class="border"></div>
+</div>
+<script>
+let mapCreate, markerCreate;
+let mapEdit, markerEdit;
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Default lokasi
+    const defaultLat = -7.9797;
+    const defaultLon = 112.6304;
+
+    /* =========================
+       MAP CREATE
+    ========================== */
+    mapCreate = L.map('mapCreate', {
+        center: [defaultLat, defaultLon],
+        zoom: 11
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: "© OpenStreetMap"
+    }).addTo(mapCreate);
+
+    mapCreate.on("click", (e) => {
+        const lat = e.latlng.lat.toFixed(6);
+        const lon = e.latlng.lng.toFixed(6);
+
+        document.getElementById("latitude_create").value = lat;
+        document.getElementById("longitude_create").value = lon;
+
+        if (markerCreate) markerCreate.remove();
+        markerCreate = L.marker([lat, lon]).addTo(mapCreate);
+    });
+
+    /* =========================
+       MAP EDIT
+    ========================== */
+    mapEdit = L.map('mapEdit', {
+        center: [defaultLat, defaultLon],
+        zoom: 11
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: "© OpenStreetMap"
+    }).addTo(mapEdit);
+
+    mapEdit.on("click", (e) => {
+        const lat = e.latlng.lat.toFixed(6);
+        const lon = e.latlng.lng.toFixed(6);
+
+        document.getElementById("latitude_edit").value = lat;
+        document.getElementById("longitude_edit").value = lon;
+
+        if (markerEdit) markerEdit.remove();
+        markerEdit = L.marker([lat, lon]).addTo(mapEdit);
+    });
+});
+
+/* =========================
+   FIX MAP SIZE KETIKA MODAL DIBUKA
+========================== */
+document.addEventListener("shown.bs.modal", function (event) {
+    if (event.target.id === "modalCreate") {
+        setTimeout(() => mapCreate.invalidateSize(), 300);
+    }
+    if (event.target.id === "modalEdit") {
+        setTimeout(() => mapEdit.invalidateSize(), 300);
+    }
+});
+</script>
+
+          <input id="latitude_create" name="latitude" class="form-control" required>
+<input id="longitude_create" name="longitude" class="form-control" required>
+
           <div class="col-md-6"><label class="form-label">Kecamatan</label><input name="kecamatan" class="form-control" required></div>
           <div class="col-md-6"><label class="form-label">Satelit</label><input name="satelit" class="form-control" value="Snpp/VIIRS"></div>
           <div class="col-12"><label class="form-label">Keterangan</label><input name="keterangan" class="form-control"></div>
@@ -333,8 +413,14 @@
           <div class="col-md-4"><label class="form-label">Tanggal</label><input type="date" name="tanggal" class="form-control" required></div>
           <div class="col-md-4"><label class="form-label">Titik Panas</label><input type="number" name="titik_panas" class="form-control" min="0" required></div>
           <div class="col-md-4"><label class="form-label">Waktu</label><input type="time" name="waktu" class="form-control"></div>
-          <div class="col-md-6"><label class="form-label">Latitude</label><input name="latitude" class="form-control" required></div>
-          <div class="col-md-6"><label class="form-label">Longitude</label><input name="longitude" class="form-control" required></div>
+          {{-- Peta Lokasi --}}
+                <div class="mb-3">
+    <label class="form-label fw-semibold">Pilih Lokasi di Peta</label>
+    <div id="mapEdit" style="height: 350px; border-radius: 10px;" class="border"></div>
+</div>
+
+          <input id="latitude_edit" name="latitude" class="form-control" required>
+<input id="longitude_edit" name="longitude" class="form-control" required>
           <div class="col-md-6"><label class="form-label">Kecamatan</label><input name="kecamatan" class="form-control" required></div>
           <div class="col-md-6"><label class="form-label">Satelit</label><input name="satelit" class="form-control"></div>
           <div class="col-12"><label class="form-label">Keterangan</label><input name="keterangan" class="form-control"></div>
@@ -387,9 +473,7 @@
   }
 
   // Auto-hide flash success
-  document.querySelectorAll('.alert-success').forEach(el=>{
-    setTimeout(()=>{ el.style.transition='opacity .4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }, 2500);
-  });
+  
 
   // Pilih semua
   const checkAll = document.getElementById('checkAll');

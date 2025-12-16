@@ -18,7 +18,9 @@ use App\Http\Controllers\{
     TitikpanasController,
     GempaController,
     PenggunaController,
-    BMKGController
+    BMKGController,
+    StatusController,
+    JenisBencanaController
 };
 
 /*
@@ -71,6 +73,7 @@ Route::middleware('auth')->group(function () {
 
     // Laporan harian dan cetak
     Route::get('/beranda/cetak-laporan-eoc', [AuthController::class, 'printLaphar'])->name('beranda.cetak-laphar');
+    Route::get('/laporan-harian/filter', [AuthController::class, 'showFilterForm'])->name('laporan.filter');
     Route::get('/laporan-harian', [AuthController::class, 'laporanHarian'])->name('laporan.harian');
 });
 
@@ -109,6 +112,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kejadian/filter', 'filter')->name('kejadian.filter');
         Route::get('/kejadian/{id_kejadian}', 'show')->name('kejadian.show');
         Route::get('/kejadian/print', 'printByTanggal')->name('kejadian.printByTanggal');
+        Route::get('/kejadian/getIndex', [KejadianController::class, 'getIndex'])->name('kejadian.getIndex');
         Route::get('/get-tb_desa/{id_kecamatan}', [DesaController::class, 'getDesa'])->name('desa.get');
     });
 });
@@ -124,26 +128,35 @@ Route::controller(KaryawanController::class)->group(function () {
     Route::delete('/petugas/{nip_pengawas}', 'destroy')->name('karyawan.destroy');
 });
 
+// route untuk tambah status darurat
+Route::post('/status/store', [StatusController::class, 'store'])->name('status.store');
+
+// route untuk tambah jenis bencana
+Route::post('/jenis/store', [JenisBencanaController::class, 'store'])->name('jenis.store');
+
+
 /*
 |--------------------------------------------------------------------------
 | MODUL CURAH HUJAN (RAIN)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth'])->group(function () {
+Route::controller(RainController::class)->group(function () {
+    Route::get('/hujan', 'index')->name('rain.index');
+    Route::get('/rain', 'index')->name('rain.index');
 
-    Route::controller(RainController::class)->group(function () {
-        Route::get('/hujan', 'index')->name('rain.index');
-        Route::get('/rain', [RainController::class, 'index'])->name('rain.index');
-        Route::get('/hujan/tambah', 'create')->name('rain.create');
-        Route::post('/hujan', 'store')->name('rain.store');
-        Route::get('/hujan/{rain}/edit', 'edit')->name('rain.edit');
-        Route::put('/hujan/{rain}', 'update')->name('rain.update');
-        Route::delete('/hujan/{rain}', 'destroy')->name('rain.destroy');
+    Route::get('/hujan/tambah', 'create')->name('rain.create');
+    Route::post('/hujan', 'store')->name('rain.store');
+    Route::get('/hujan/{rain}/edit', 'edit')->name('rain.edit');
+    Route::put('/hujan/{rain}', 'update')->name('rain.update');
+    Route::delete('/hujan/{rain}', 'destroy')->name('rain.destroy');
 
-        // Cetak PDF
-        Route::get('/hujan/cetak/grafik', 'cetakPdfGrafik')->name('rainpdfgrafik');
-    });
+    // Cetak PDF DATA
+    Route::get('/hujan/cetak', 'cetakPdf')->name('rain.cetakpdf');
+
+    // Cetak PDF GRAFIK
+    Route::get('/hujan/cetak/grafik', 'cetakPdfGrafik')->name('rainpdfgrafik');
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -201,6 +214,15 @@ Route::middleware('auth')->group(function () {
 */
 Route::get('/titikpanas', [TitikpanasController::class, 'index'])->name('titikpanas.index');
 Route::post('/titikpanas/store', [TitikpanasController::class, 'store'])->name('titikpanas.store');
-Route::get('/titikpanas/cetak/pdf', [TitikpanasController::class, 'cetakPdf'])->name('titikpanas.cetak.pdf');
+Route::put('/titikpanas/{titikpanas}', [TitikpanasController::class, 'update'])->name('titikpanas.update'); // ★ FIX
 Route::delete('/titikpanas/{titikpanas}', [TitikpanasController::class, 'destroy'])->name('titikpanas.destroy');
-Route::get('/kejadian/get-index', [KejadianController::class, 'getIndex'])->name('kejadian.getIndex');
+Route::get('/titikpanas/cetak/pdf', [TitikpanasController::class, 'cetakPdf'])->name('titikpanas.cetak.pdf');
+
+
+Route::post('/template-ttd', [KaryawanController::class, 'storeTemplate'])->name('template.store');
+Route::delete('/status/{id_status_darurat}', [KaryawanController::class, 'destroyStatus'])
+     ->name('status.destroy');
+
+Route::delete('/jenis/{id_jenis_bencana}', [KaryawanController::class, 'destroyJenis'])
+     ->name('jenis.destroy');
+

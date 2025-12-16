@@ -6,12 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class JenisBencana extends Model
 {
-    protected $table = 'tb_jenis_bencana'; // sesuaikan nama tabel di database
+    protected $table = 'tb_jenis_bencana';
+
     protected $primaryKey = 'id_jenis_bencana';
-    public $timestamps = false;
+
+    public $timestamps = false; // tabel kamu tidak punya created_at / updated_at
 
     protected $fillable = [
-        'id_jenis_bencana',
-        'nama_bencana',
+        'jenis_bencana',
+        'id_klasifikasi_bencana',
     ];
+
+    public function klasifikasi()
+{
+    return $this->belongsTo(KlasifikasiBencana::class, 'id_klasifikasi_bencana');
+}
+
 }

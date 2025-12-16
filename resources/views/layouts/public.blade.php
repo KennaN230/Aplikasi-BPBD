@@ -89,11 +89,11 @@
       </a>
 
       <nav class="menu" id="mainMenu" aria-label="Menu utama">
-        <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a>
-        <a href="{{ url('/#map') }}">Peta</a>
-        <a href="{{ url('/#stat') }}">Statistik</a>
-        <a href="{{ url('/#ringkasan') }}">Ringkasan</a>
-        <a href="{{ url('/#kontak') }}">Kontak</a>
+        <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}"></a>
+        <a href="{{ url('/#map') }}"></a>
+        <a href="{{ url('/#stat') }}"></a>
+        <a href="{{ url('/#ringkasan') }}"></a>
+        <a href="{{ url('/#kontak') }}"></a>
       </nav>
 
       <div class="actions">

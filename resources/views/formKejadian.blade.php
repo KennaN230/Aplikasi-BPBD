@@ -73,6 +73,7 @@
 {{-- ====== CONTENT ====== --}}
 <div class="row g-4">
 
+    <div class="row g-4">
     {{-- === KARTU: PETA === --}}
     <div class="col-lg-6">
         <div class="card shadow border-0">
@@ -86,79 +87,28 @@
         </div>
     </div>
 
-    {{-- === KARTU: GRAFIK TAHUN === --}}
-    <div class="col-lg-6">
-        <div class="card shadow border-0">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">Grafik Jumlah Kejadian per Tahun</h6>
-                <div class="d-flex align-items-center gap-2">
-                    <input type="text" class="form-control form-control-sm bg-light border-0" placeholder="Cari...">
-                    <select class="form-select form-select-sm bg-light border-0">
-                        <option>2025</option>
-                        <option>2024</option>
-                        <option>2023</option>
-                    </select>
-                </div>
-            </div>
-            <div class="card-body">
-                <canvas id="chartTahun" style="height: 300px;"></canvas>
-            </div>
-        </div>
-    </div>
-
-    {{-- === KARTU: GRAFIK BULAN === --}}
-    <div class="col-lg-6">
-        <div class="card shadow border-0">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">Grafik Jumlah Kejadian per Bulan</h6>
-                <div>
-                    <label for="filterTahun" class="me-2 small">Tahun:</label>
-                    <select id="filterTahun" class="form-select form-select-sm bg-light border-0">
-                        <option>2021</option>
-                        <option>2022</option>
-                        <option>2023</option>
-                        <option>2024</option>
-                        <option selected>2025</option>
-                    </select>
-                </div>
-            </div>
-            <div class="card-body">
-                <canvas id="chartBulan" style="height: 300px;"></canvas>
-            </div>
-        </div>
-    </div>
-
     {{-- === KARTU: TABEL DATA === --}}
     <div class="col-lg-6">
         <div class="card shadow border-0">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h6 class="mb-0">Tabel Kejadian Bencana Per Tahun</h6>
+                <h6 class="mb-0">Tabel Kejadian Bencana</h6>
                 <div class="d-flex gap-2">
-                    <select class="form-select form-select-sm bg-light border-0">
-                        <option>2025</option>
-                        <option>2024</option>
-                        <option>2023</option>
-                    </select>
                     <a href="{{ route('kejadian.create') }}" class="btn btn-warning btn-sm fw-bold">+ Tambah</a>
                     <button class="btn btn-success btn-sm fw-bold">Unduh</button>
                 </div>
             </div>
             <div class="card-body">
-
-                {{-- === Filter dan Print === --}}
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <form action="{{ route('kejadian.filter') }}" method="GET" class="d-flex gap-2">
-                        <input type="date" name="tanggal" value="{{ request('tanggal') }}" class="form-control form-control-sm">
-                        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-                    </form>
+                {{-- Filter tanggal --}}
+                <form action="{{ route('kejadian.filter') }}" method="GET" class="d-flex gap-2 mb-3">
+                    <input type="date" name="tanggal" value="{{ request('tanggal') }}" class="form-control form-control-sm">
+                    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
                     @if(request('tanggal'))
-    <a href="{{ route('kejadian.printByTanggal', ['tanggal' => request('tanggal')]) }}" target="_blank"
-       class="btn btn-success btn-sm">🖨️ Print</a>
-@endif
+                        <a href="{{ route('kejadian.printByTanggal', ['tanggal' => request('tanggal')]) }}" target="_blank"
+                           class="btn btn-success btn-sm">🖨️ Print</a>
+                    @endif
+                </form>
 
-                </div>
-
-                {{-- === Tabel === --}}
+                {{-- Tabel data --}}
                 <div class="table-responsive">
                     <table class="table table-bordered table-hover align-middle">
                         <thead class="table-primary text-center">
@@ -173,27 +123,16 @@
                         <tbody>
                             @forelse($kejadian as $k)
                                 <tr>
-                                    <td>{{ $k->namaKejadian->nama_kejadian ?? '-' }}</td>
-                                    <td>
-                                        @php
-                                            $hari = \Carbon\Carbon::parse($k->tanggal)->locale('id')->isoFormat('dddd');
-                                        @endphp
-                                        {{ $hari }}
-                                    </td>
+                                    <td>{{ $k->nama_kejadian ?? '-' }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($k->tanggal)->locale('id')->isoFormat('dddd') }}</td>
                                     <td>{{ \Carbon\Carbon::parse($k->tanggal)->translatedFormat('d F Y') }}</td>
                                     <td>{{ $k->kecamatan->kecamatan ?? '-' }}</td>
                                     <td class="text-center">
                                         <div class="d-flex flex-column gap-2">
                                             <a href="{{ route('kejadian.show', $k->id_kejadian) }}" class="btn btn-primary btn-sm">ℹ Info</a>
                                             <a href="{{ route('kejadian.edit', $k->id_kejadian) }}" class="btn btn-warning btn-sm">✎ Edit</a>
-                                            <!-- Tombol Print -->
-        <a href="{{ route('kejadian.print', ['id_kejadian' => $k->id_kejadian]) }}" 
-           target="_blank" 
-           class="btn btn-success btn-sm">
-           🖨 Print
-        </a>
-                                            <form action="{{ route('kejadian.destroy', $k->id_kejadian) }}" method="POST"
-                                                  onsubmit="return confirm('Yakin ingin menghapus data ini?')">
+                                            <a href="{{ route('kejadian.print', ['id_kejadian' => $k->id_kejadian]) }}" target="_blank" class="btn btn-success btn-sm">🖨 Print</a>
+                                            <form action="{{ route('kejadian.destroy', $k->id_kejadian) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus data ini?')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">🗑 Hapus</button>
@@ -210,20 +149,66 @@
                     </table>
                 </div>
 
-                {{-- Pagination (Bootstrap style) --}}
-                <div class="d-flex justify-content-end mt-3">
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0">
-                            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                            <li class="page-item"><a class="page-link" href="#">2</a></li>
-                            <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        </ul>
-                    </nav>
-                </div>
             </div>
         </div>
     </div>
+</div>
 
+
+    {{-- Chart Tahun --}}
+<div class="card shadow border-0">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Grafik Jumlah Kejadian per Tahun</h6>
+        <div>
+            <select id="filterTahun" class="form-select form-select-sm bg-light border-0">
+                @for($y = date('Y'); $y >= 2021; $y--)
+                    <option value="{{ $y }}">{{ $y }}</option>
+                @endfor
+            </select>
+        </div>
+    </div>
+    <div class="card-body">
+        <canvas id="chartTahun" style="height: 300px;"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Ambil data kejadian dari backend
+    {
+    const kejadianList = @json($kejadian);
+
+    const tahunCounts = {};
+    kejadianList.forEach(k => {
+        const year = new Date(k.tanggal).getFullYear();
+        tahunCounts[year] = (tahunCounts[year] || 0) + 1;
+    });
+
+    const labels = Object.keys(tahunCounts).sort();
+    const data = Object.values(tahunCounts);
+
+    const ctx = document.getElementById('chartTahun').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Jumlah Kejadian',
+                data: data,
+                backgroundColor: 'rgba(37,99,235,0.8)',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            scales: { y: { beginAtZero: true } },
+            plugins: { legend: { display: false } },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+</script>
+</div>
 </div>
 
 {{-- ====== ASSETS (CDN) ====== --}}

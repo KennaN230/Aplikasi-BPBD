@@ -58,10 +58,13 @@
     }
 
     .ttd {
-      margin-top: 60px;
+      margin-top: 20px;
       text-align: right;
       font-size: 13px;
     }
+    .ttd p {
+            margin: 5px 0;
+        }
   </style>
 </head>
 <body>
@@ -69,8 +72,8 @@
   {{-- HEADER --}}
   <div class="header">
     <div class="logo">
-        @if($logo1)
-            <img src="data:image/png;base64,{{ $logo1 }}" alt="Logo Kiri">
+        @if($logo2)
+            <img src="data:image/png;base64,{{ $logo2 }}" alt="Logo Kanan">
         @endif
     </div>
     <div class="center">
@@ -78,9 +81,7 @@
         <div class="periode">Periode: {{ $periode }}</div>
     </div>
     <div class="logo">
-        @if($logo2)
-            <img src="data:image/png;base64,{{ $logo2 }}" alt="Logo Kanan">
-        @endif
+        
     </div>
   </div>
 
@@ -94,13 +95,42 @@
   </div>
 
   {{-- TANDA TANGAN --}}
-  <div class="ttd">
+<div class="ttd">
     <p>Malang, {{ now()->translatedFormat('d F Y') }}</p>
-    <p>Kepala BPBD Kabupaten Malang</p>
-    <br><br><br>
-    <p><u>____________________</u></p>
-    <p>NIP. 19650101 199001 1 001</p>
-  </div>
+    
+    @if($templateTTD)
+        {{-- Jika menggunakan single template --}}
+        <p>{{ $templateTTD->jabatan }}</p>
+        <br><br><br>
+        <p><strong><u>{{ strtoupper($templateTTD->nama_pengawas) }}</u></strong></p>
+        <p>{{ $templateTTD->jabatan }}</p>
+        <p>NIP. {{ $templateTTD->nip_pengawas }}</p>
+    @elseif($ttdKepala)
+        {{-- Jika mencari berdasarkan jabatan tertentu --}}
+        <p>{{ $ttdKepala->jabatan }}</p>
+        <br><br><br>
+        <p><strong><u>{{ strtoupper($ttdKepala->nama_pengawas) }}</u></strong></p>
+        <p>{{ $ttdKepala->jabatan }}</p>
+        <p>NIP. {{ $ttdKepala->nip_pengawas }}</p>
+    @elseif($templatesTTD->count() > 0)
+        {{-- Jika ada multiple template, ambil yang pertama --}}
+        @php
+            $firstTTD = $templatesTTD->first();
+        @endphp
+        <p>{{ $firstTTD->jabatan }}</p>
+        <br><br><br>
+        <p><strong><u>{{ strtoupper($firstTTD->nama_pengawas) }}</u></strong></p>
+        <p>{{ $firstTTD->jabatan }}</p>
+        <p>NIP. {{ $firstTTD->nip_pengawas }}</p>
+    @else
+        {{-- Fallback ke hardcoded --}}
+        <p>Kepala BPBD Kabupaten Malang</p>
+        <br><br><br>
+        <p><strong><u>ZAINUDDIN, S.H.</u></strong></p>
+        <p>Penata Tingkat 1</p>
+        <p>NIP. 19650101 199001 1 001</p>
+    @endif
+</div>
 
   {{-- SCRIPT CHART --}}
   <script>

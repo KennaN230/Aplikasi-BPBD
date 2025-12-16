@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class KategoriUmur extends Model
 {
-    use HasFactory;
-
-    protected $table = 'tb_kategori_umur'; // nama tabel
-    protected $primaryKey = 'id';       // sesuaikan dengan PK tabel
-    public $timestamps = false;         // matikan kalau tidak pakai created_at & updated_at
-
+    protected $table = 'tb_kategori_umur';
+    
+    // Jika primary key bukan 'id', tambahkan ini
+    protected $primaryKey = 'id_kategori_umur';
+    
+    // Jika tidak ingin menggunakan timestamps
+    public $timestamps = false;
+    
     protected $fillable = [
-        'nama_kategori',  // sesuaikan dengan kolom tabel
+        'kategori_umur',
+        // tambahkan kolom lain jika ada
     ];
 }

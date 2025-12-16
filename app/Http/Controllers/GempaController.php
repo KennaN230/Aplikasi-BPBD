@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Gempa;
 use App\Models\User;
+use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\TemplateTTD;
 
 class GempaController extends Controller
 {
@@ -125,36 +127,53 @@ class GempaController extends Controller
 
     if ($request->tgl_mulai && $request->tgl_selesai) {
         $query->whereBetween('tanggal', [$request->tgl_mulai, $request->tgl_selesai]);
-        $startDate = \Carbon\Carbon::parse($request->tgl_mulai)->translatedFormat('d F Y');
-        $endDate   = \Carbon\Carbon::parse($request->tgl_selesai)->translatedFormat('d F Y');
+        $startDate = Carbon::parse($request->tgl_mulai)->translatedFormat('d F Y');
+        $endDate   = Carbon::parse($request->tgl_selesai)->translatedFormat('d F Y');
     } elseif ($request->bulan && $request->tahun) {
         $query->whereMonth('tanggal', $request->bulan)
               ->whereYear('tanggal', $request->tahun);
-        $startDate = \Carbon\Carbon::createFromDate($request->tahun, $request->bulan, 1)
+        $startDate = Carbon::createFromDate($request->tahun, $request->bulan, 1)
                         ->translatedFormat('d F Y');
-        $endDate   = \Carbon\Carbon::createFromDate($request->tahun, $request->bulan, 1)
+        $endDate   = Carbon::createFromDate($request->tahun, $request->bulan, 1)
                         ->endOfMonth()
                         ->translatedFormat('d F Y');
     } elseif ($request->tahun) {
         $query->whereYear('tanggal', $request->tahun);
         $startDate = 'Tahun ' . $request->tahun;
     } else {
-        $startDate = now()->translatedFormat('d F Y');
+        $startDate = Carbon::now()->translatedFormat('d F Y');
     }
 
     $kejadian = $query->orderBy('tanggal', 'desc')->get();
 
-    // ✅ Tambahkan bagian ini
+    // Logo
     $path1 = public_path('gambar/logo1.png');
     $path2 = public_path('gambar/logo2.png');
 
     $logo1 = file_exists($path1) ? base64_encode(file_get_contents($path1)) : null;
     $logo2 = file_exists($path2) ? base64_encode(file_get_contents($path2)) : null;
 
-    // ✅ Kirim variabel logo ke view
     $tanggal = $startDate . ($endDate ? ' s/d ' . $endDate : '');
-    $pdf = Pdf::loadView('gempa.pdf', compact('kejadian', 'startDate', 'endDate', 'logo1', 'logo2', 'tanggal'));
+    $tglTtd = Carbon::now()->translatedFormat('d F Y');
 
+    // ==========================
+    // AMBIL DATA TTD DARI DATABASE
+    // ==========================
+    $ttdPertama = TemplateTTD::where('is_active', 1)
+        ->select('nama_pengawas', 'nip_pengawas', 'jabatan')
+        ->orderBy('id', 'desc')
+        ->first();
+
+    $pdf = Pdf::loadView('gempa.pdf', compact(
+        'kejadian', 
+        'startDate', 
+        'endDate', 
+        'logo1', 
+        'logo2', 
+        'tanggal', 
+        'tglTtd',
+        'ttdPertama' // ← TAMBAHKAN INI
+    ));
 
     return $pdf->stream('laporan-gempa.pdf');
 }

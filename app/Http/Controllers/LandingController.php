@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use App\Models\Kejadian;
 
 class LandingController extends Controller
 {
@@ -30,6 +31,12 @@ class LandingController extends Controller
         [$from, $to] = $this->parsePeriod($r);
         $fromDate = $from->toDateString();
         $toDate   = $to->toDateString();
+
+        $kejadian = Kejadian::with(['kecamatan', 'desa', 'jenisBencana', 'korban', 'rumah', 'sarpras'])
+            ->whereBetween('tanggal', [$from->toDateString(), $to->toDateString()])
+            ->get();
+
+        $kejadianTotal = $kejadian->count();   
 
         // ========== BASE KEJADIAN ==========
         $kejBase = DB::table('tb_kejadian as j')
@@ -333,11 +340,32 @@ class LandingController extends Controller
             ->whereIn('j.id_kejadian',$kejIds)
             ->groupBy('d.desa')->pluck('d.desa')->toArray();
 
-        $lokasi = [
-            'desa'      => count($desaList)?implode(', ',$desaList):($last->nama_desa ?? '-'),
-            'kecamatan' => $kecamatan,'kabupaten'=>'Malang','provinsi'=>'Jawa Timur',
-            'tanggal'   => $last? Carbon::parse($last->tanggal)->format('d-m-Y') : '-', 'foto_url'=>null
-        ];
+        // --- Handle dokumentasi (bisa berupa JSON array atau string tunggal) ---
+$rawDoc = $last->dokumentasi ?? null;
+
+$doc = [];
+
+// Jika tidak kosong, coba parse
+if ($rawDoc) {
+    $parsed = json_decode($rawDoc, true);
+
+    if (json_last_error() === JSON_ERROR_NONE && is_array($parsed)) {
+        // Bentuk: ["img1.png", "img2.png"]
+        $doc = $parsed;
+    } else {
+        // Bentuk: "dokumentasi/92wYgWLZ...png"
+        $doc = [$rawDoc];
+    }
+}
+
+$lokasi = [
+    'desa'       => count($desaList) ? implode(', ', $desaList) : ($last->nama_desa ?? '-'),
+    'kecamatan'  => $kecamatan,
+    'kabupaten'  => 'Malang',
+    'provinsi'   => 'Jawa Timur',
+    'tanggal'    => $last ? Carbon::parse($last->tanggal)->format('d-m-Y') : '-',
+    'dokumentasi'=> $doc  // selalu array
+];
 
         $kAgg = DB::table('tb_korban as kb')
             ->leftJoin('tb_kategori_korban as kk','kk.id_kategori_korban','=','kb.id_kategori_korban')

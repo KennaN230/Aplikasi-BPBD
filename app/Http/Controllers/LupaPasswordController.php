@@ -11,7 +11,7 @@ class LupaPasswordController extends Controller
 {
     public function create()
     {
-        return view('lupa-password');
+        return view('users.lupa-password');
     }
 
     public function store(Request $request)
@@ -29,7 +29,7 @@ class LupaPasswordController extends Controller
 
     public function edit(Request $request, $token)
     {
-        return view('reset-password', [
+        return view('users.reset-password', [
             'token' => $token,
             'email' => $request->query('email'),
         ]);

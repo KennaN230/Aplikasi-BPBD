@@ -94,9 +94,6 @@
   </div>
 </div>
   {{-- Notifikasi --}}
-  @if(session('success'))
-    <div class="alert alert-success">✅ {{ session('success') }}</div>
-  @endif
   @if(session('error'))
     <div class="alert alert-danger">⚠️ {{ session('error') }}</div>
   @endif
@@ -162,7 +159,8 @@
                   '{{ $item->hari_hujan }}',
                   '{{ $item->hari_tidak_hujan }}',
                   '{{ \Carbon\Carbon::parse($item->hari_tanggal)->format('Y-m-d') }}'
-                )">
+                )"
+                >
                 Edit
               </button>
               <form action="{{ route('rain.destroy', $item->id) }}" method="POST" style="display:inline;">
@@ -233,6 +231,8 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   const labels = @json($grafik->pluck('kecamatan'));
@@ -249,8 +249,23 @@
         { label: 'Hari Tidak Hujan', data: tidak_hujan, backgroundColor: '#4636a2ff' },
       ]
     },
-    options: { responsive: true, scales: { y: { beginAtZero: true } } }
-  });
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            // Paksa tampilkan angka bulat
+            callback: function(value) {
+              return Math.round(value);
+            },
+            stepSize: 1  // Setiap step 1 unit
+          }
+        }
+      }
+    }
+});
+
 
   document.getElementById('dataType').addEventListener('change', e => {
     const val = e.target.value;
@@ -265,14 +280,20 @@
 
   function openEditModal(id, kecamatan, hujan, tidakHujan, tanggal){
     const modal = new bootstrap.Modal(document.getElementById('editModal'));
+    
+    // Set input value
     document.getElementById('editId').value = id;
     document.getElementById('editKecamatan').value = kecamatan;
     document.getElementById('editHujan').value = hujan;
     document.getElementById('editTidakHujan').value = tidakHujan;
     document.getElementById('editTanggal').value = tanggal;
-    document.getElementById('editForm').action = '/rain/' + id;
+
+    // Set form action secara dinamis pakai route helper Laravel
+    const form = document.getElementById('editForm');
+    form.action = "{{ url('/hujan') }}/" + id;
+
     modal.show();
-  }
+}
 </script>
 @endpush
 </body>

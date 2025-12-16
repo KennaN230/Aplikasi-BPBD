@@ -16,7 +16,7 @@ class StatusDarurat extends Model
         'status'
     ];
 
-    public $timestamps = true;
+    public $timestamps = false;
 
     // Relasi ke Kejadian (1 StatusDarurat bisa dipakai banyak Kejadian)
     public function kejadian()

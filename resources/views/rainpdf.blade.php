@@ -90,8 +90,8 @@
 
     {{-- KOP SURAT --}}
     <div class="kop-container">
-    @if($logo1)
-        <img src="data:image/png;base64,{{ $logo1 }}" alt="Logo Kiri" class="kop-logo">
+    @if($logo2)
+        <img src="data:image/png;base64,{{ $logo2 }}" alt="Logo Kanan" class="kop-logo">
     @endif
     <div class="kop-text">
         <h2>PEMERINTAH KABUPATEN MALANG</h2>
@@ -100,9 +100,7 @@
         <p>Telepon/ Faksimile (0341) 392121 Laman : bpbd.malangkab.go.id</p>
         <p>Pos-el : bpbd@malangkab.go.id, Kode Pos : 65163</p>
     </div>
-    @if($logo2)
-        <img src="data:image/png;base64,{{ $logo2 }}" alt="Logo Kanan" class="kop-logo">
-    @endif
+    
 </div>
 
 
@@ -151,13 +149,22 @@
     </table>
 
     {{-- TANDA TANGAN --}}
-    <div class="ttd">
-        <p>Malang, {{ now()->translatedFormat('d F Y') }}</p>
+<div class="ttd">
+    <p>Malang, {{ now()->translatedFormat('d F Y') }}</p>
+    
+    @if(isset($ttdPertama) && $ttdPertama)
+        <p>{{ $ttdPertama->jabatan }}</p>
+        <br><br><br>
+        <p><strong><u>{{ $ttdPertama->nama_pengawas }}</u></strong></p>
+        <p>NIP. {{ $ttdPertama->nip_pengawas }}</p>
+    @else
+        {{-- Fallback statis --}}
         <p>Kepala BPBD Kabupaten Malang</p>
         <br><br><br>
-        <p><u>____________________</u></p>
+        <p><strong><u>ZAINUDDIN, S.H.</u></strong></p>
+        <p>Penata Tingkat 1</p>
         <p>NIP. 19650101 199001 1 001</p>
-    </div>
-
+    @endif
+</div>
 </body>
 </html>

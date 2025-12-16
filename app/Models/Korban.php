@@ -2,17 +2,17 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Korban extends Model
 {
-    use HasFactory;
-
     protected $table = 'tb_korban';
+    
+    // Jika primary key bukan 'id'
     protected $primaryKey = 'id_korban';
-    public $timestamps = false; // kalau tabel tidak punya created_at / updated_at
-
+    
+    public $timestamps = false;
+    
     protected $fillable = [
         'id_kejadian',
         'id_kategori_korban',
@@ -20,22 +20,22 @@ class Korban extends Model
         'L',
         'P',
     ];
-
-    // relasi ke kejadian
-    public function kejadian()
-    {
-        return $this->belongsTo(Kejadian::class, 'id_kejadian');
-    }
-
-    // relasi ke kategori korban
+    
+    // Relasi ke KategoriKorban
     public function kategoriKorban()
     {
-        return $this->belongsTo(KategoriKorban::class, 'id_kategori_korban');
+        return $this->belongsTo(KategoriKorban::class, 'id_kategori_korban', 'id_kategori_korban');
     }
-
-    // relasi ke kategori umur
+    
+    // Relasi ke KategoriUmur
     public function kategoriUmur()
     {
-        return $this->belongsTo(KategoriUmur::class, 'id_kategori_umur');
+        return $this->belongsTo(KategoriUmur::class, 'id_kategori_umur', 'id_kategori_umur');
+    }
+    
+    // Relasi ke Kejadian
+    public function kejadian()
+    {
+        return $this->belongsTo(Kejadian::class, 'id_kejadian', 'id_kejadian');
     }
 }

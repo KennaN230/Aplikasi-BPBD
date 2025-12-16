@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Rain;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use App\Models\TemplateTTD;
 
 class RainController extends Controller
 {
@@ -107,41 +108,55 @@ class RainController extends Controller
     }
 
     public function cetakPdf(Request $request)
-    {
-        $query = $this->filterQuery($request);
-        $data = $query->orderBy('hari_tanggal', 'asc')->get();
+{
+    $query = $this->filterQuery($request);
+    $data = $query->orderBy('hari_tanggal', 'asc')->get();
 
-        $logos = $this->getLogos();
-        $tanggal = $this->getLabelTanggal($request);
+    $logos = $this->getLogos();
+    $tanggal = $this->getLabelTanggal($request);
+    
+    // ========== AMBIL DATA TTD ==========
+    $ttdPertama = TemplateTTD::where('is_active', 1)
+        ->select('nama_pengawas', 'nip_pengawas', 'jabatan')
+        ->orderBy('id', 'desc')
+        ->first();
 
-        return view('rainpdf', array_merge($logos, [
-            'data' => $data,
-            'tanggal'  => $tanggal,
-        ]));
-    }
+    return view('rainpdf', array_merge($logos, [
+        'data' => $data,
+        'tanggal'  => $tanggal,
+        'ttdPertama' => $ttdPertama // ← KIRIM KE VIEW
+    ]));
+}
 
-    public function cetakPdfGrafik(Request $request)
-    {
-        $query = $this->filterQuery($request);
+public function cetakPdfGrafik(Request $request)
+{
+    $query = $this->filterQuery($request);
 
-        $data = $query
-            ->select(
-                'kecamatan',
-                DB::raw('SUM(hari_hujan) as total_hari_hujan'),
-                DB::raw('SUM(hari_tidak_hujan) as total_hari_tidak_hujan')
-            )
-            ->groupBy('kecamatan')
-            ->orderBy('kecamatan', 'asc')
-            ->get();
+    $data = $query
+        ->select(
+            'kecamatan',
+            DB::raw('SUM(hari_hujan) as total_hari_hujan'),
+            DB::raw('SUM(hari_tidak_hujan) as total_hari_tidak_hujan')
+        )
+        ->groupBy('kecamatan')
+        ->orderBy('kecamatan', 'asc')
+        ->get();
 
-        $logos = $this->getLogos();
-        $tanggal = $this->getLabelTanggal($request);
+    $logos = $this->getLogos();
+    $tanggal = $this->getLabelTanggal($request);
+    
+    // ========== AMBIL DATA TTD ==========
+    $ttdPertama = TemplateTTD::where('is_active', 1)
+        ->select('nama_pengawas', 'nip_pengawas', 'jabatan')
+        ->orderBy('id', 'desc')
+        ->first();
 
-        return view('rainpdfgrafik', array_merge($logos, [
-            'kejadian' => $data,
-            'tanggal'  => $tanggal,
-        ]));
-    }
+    return view('rainpdfgrafik', array_merge($logos, [
+        'kejadian' => $data,
+        'tanggal'  => $tanggal,
+        'ttdPertama' => $ttdPertama // ← KIRIM KE VIEW
+    ]));
+}
 
     private function getLabelTanggal(Request $request)
     {

@@ -204,10 +204,10 @@
 </div>
 
 <div class="chart-container">
-  <h3 style="text-align:center; color:#122453;">Grafik Tinggi Gelombang per-Bulan</h3>
+  <h3 style="text-align:center; color:#122453;">Grafik Tinggi Gelombang Harian</h3>
   <canvas id="gelombangChart" height="120"></canvas>
   <hr class="my-3">
-  <h4 style="text-align:center; color:#122453;">Rata-Rata Tinggi Gelombang Harian</h4>
+  <h4 style="text-align:center; color:#122453;">Rata-Rata Tinggi Gelombang per-Bulan</h4>
   <canvas id="rataChart" height="100"></canvas>
 </div>
 @endsection

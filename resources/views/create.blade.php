@@ -27,16 +27,16 @@
                     </select>
                 </div>
 
-    {{-- === Nama Kejadian === --}}
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">Nama Kejadian</label>
-                    <select name="id_nama_kejadian" class="form-select" required>
-                        <option value="">-- Pilih Nama Kejadian --</option>
-                        @foreach($namaKejadian as $nk)
-                            <option value="{{ $nk->id_nama_kejadian }}">{{ $nk->nama_kejadian }}</option>
-                        @endforeach
-                    </select>
-                </div>
+    {{-- === Nama Kejadian Manual === --}}
+<div class="mb-3">
+    <label class="form-label fw-semibold">Nama Kejadian</label>
+    <input type="text" name="nama_kejadian" 
+           class="form-control" 
+           placeholder="Contoh: Banjir Bandang, Longsor, Puting Beliung" 
+           required>
+    <small class="text-muted">Masukkan nama kejadian secara manual.</small>
+</div>
+
 
                 {{-- === Tanggal & Waktu === --}}
                 <div class="row mb-3">
@@ -229,13 +229,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Status Darurat</label>
                     <select name="id_status_darurat" class="form-select">
-                        <option value="">-- Pilih Status Darurat --</option>
+                        <option value="">-- Penetapan Status --</option>
                         @foreach($statusDarurat as $status)
                             <option value="{{ $status->id_status_darurat }}">{{ $status->status }}</option>
                         @endforeach
                     </select>
                 </div>
-
 
             {{-- Upaya --}}
 <div class="mb-3">
@@ -252,8 +251,10 @@ document.addEventListener('DOMContentLoaded', function () {
 {{-- Dokumentasi --}}
 <div class="mb-3">
     <label class="form-label fw-semibold">Dokumentasi</label>
-    <input type="file" name="dokumentasi" class="form-control">
-    <div class="form-text text-muted">Unggah foto atau dokumen pendukung (jika ada)</div>
+    <input type="file" name="dokumentasi[]" class="form-control" multiple accept="image/*,video/*">
+    <div class="form-text text-muted">
+        Unggah foto atau video. Bisa memilih lebih dari satu file.
+    </div>
 </div>
 
 {{-- Sebaran Dampak --}}
@@ -391,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <input type="number" name="rmh_rb" class="form-control" value="0" min="0">
             </div>
             <div class="col-md-6 col-lg-3">
-                <label class="form-label fw-semibold">Terendam</label>
+                <label class="form-label fw-semibold">Tenggelam</label>
                 <input type="number" name="terendam" class="form-control" value="0" min="0">
             </div>
         </div>
@@ -426,7 +427,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <input type="number" name="sosek[rb]" class="form-control" placeholder="Rusak Berat">
             </div>
             <div class="col-md-2">
-                <input type="number" name="sosek[terendam]" class="form-control" placeholder="Terendam">
+                <input type="number" name="sosek[terendam]" class="form-control" placeholder="Tenggelam">
             </div>
         </div>
     </div>
@@ -457,7 +458,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <input type="number" name="sarpras[rb]" class="form-control" placeholder="Rusak Berat">
             </div>
             <div class="col-md-2">
-                <input type="number" name="sarpras[terendam]" class="form-control" placeholder="Terendam">
+                <input type="number" name="sarpras[terendam]" class="form-control" placeholder="Tenggelam">
             </div>
         </div>
     </div>
@@ -488,7 +489,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <input type="number" name="pelayanan_rb" class="form-control" placeholder="Rusak Berat">
             </div>
             <div class="col-md-2">
-                <input type="number" name="pelayanan_terendam" class="form-control" placeholder="Terendam">
+                <input type="number" name="pelayanan_terendam" class="form-control" placeholder="Tenggelam">
             </div>
             <div class="col-md-2">
                 <input type="number" name="taksiran" class="form-control" placeholder="Taksiran (Rp)">
